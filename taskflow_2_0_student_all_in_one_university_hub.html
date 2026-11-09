@@ -1,0 +1,2555 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow 2.0 — Smart University Student Hub</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.7); }
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-preserve-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+  </style>
+</head>
+<body class="h-full bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 font-sans antialiased flex flex-col md:flex-row overflow-hidden transition-colors duration-200">
+
+  <!-- Mobile Backdrop -->
+  <div id="mobileBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black/40 z-30 hidden md:hidden backdrop-blur-xs"></div>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 flex flex-col transition-transform duration-300 transform -translate-x-full md:translate-x-0 md:static md:shrink-0">
+    <!-- Brand Header -->
+    <div class="h-16 flex items-center justify-between px-6 border-b border-slate-100 dark:border-zinc-800/80">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-800 to-brand-600 text-white flex items-center justify-center font-bold shadow-md shadow-brand-700/20 text-lg">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div>
+          <span class="font-extrabold text-xl tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+            TaskFlow <span class="text-xs px-1.5 py-0.5 rounded-md bg-brand-100 text-brand-800 dark:bg-brand-900/60 dark:text-brand-300 font-semibold">2.0</span>
+          </span>
+          <p id="navSubHeader" class="text-[10px] uppercase font-bold tracking-wider text-slate-400 dark:text-zinc-500">Студент Жұмыс Орны</p>
+        </div>
+      </div>
+      <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Navigation Menu Items -->
+    <div class="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+      <p id="navGroupCore" class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Негізгі құралдар</p>
+      
+      <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-brand-700 bg-brand-50 dark:bg-brand-950/60 dark:text-brand-400">
+        <i class="fa-solid fa-house-chimney w-5 text-center"></i>
+        <span id="nav-dashboard">Басты бет</span>
+      </button>
+
+      <button onclick="switchTab('schedule')" data-tab="schedule" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800/60">
+        <div class="flex items-center gap-3">
+          <i class="fa-regular fa-calendar-days w-5 text-center"></i>
+          <span id="nav-schedule">Сабақ кестесі</span>
+        </div>
+        <span id="badgeActiveClasses" class="hidden text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold animate-pulse">Live</span>
+      </button>
+
+      <button onclick="switchTab('tasks')" data-tab="tasks" class="nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800/60">
+        <div class="flex items-center gap-3">
+          <i class="fa-solid fa-list-check w-5 text-center"></i>
+          <span id="nav-tasks">Тапсырмалар мен Емтихан</span>
+        </div>
+        <span id="badgePendingTasks" class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 font-semibold">0</span>
+      </button>
+
+      <button onclick="switchTab('pomodoro')" data-tab="pomodoro" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800/60">
+        <i class="fa-solid fa-stopwatch w-5 text-center"></i>
+        <span id="nav-pomodoro">Pomodoro Таймері</span>
+      </button>
+
+      <button onclick="switchTab('gpa')" data-tab="gpa" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800/60">
+        <i class="fa-solid fa-award w-5 text-center"></i>
+        <span id="nav-gpa">GPA Есептегіш</span>
+      </button>
+
+      <button onclick="switchTab('attendance')" data-tab="attendance" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800/60">
+        <i class="fa-solid fa-clipboard-user w-5 text-center"></i>
+        <span id="nav-attendance">Қатысу журналы</span>
+      </button>
+
+      <p id="navGroupLife" class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-5 mb-2">Студенттік өмір & Оқу</p>
+
+      <button onclick="switchTab('notes')" data-tab="notes" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800/60">
+        <i class="fa-regular fa-file-lines w-5 text-center"></i>
+        <span id="nav-notes">Конспекттер & Құжаттар</span>
+      </button>
+
+      <button onclick="switchTab('flashcards')" data-tab="flashcards" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800/60">
+        <i class="fa-solid fa-layer-group w-5 text-center"></i>
+        <span id="nav-flashcards">Флэшкарталар</span>
+      </button>
+
+      <button onclick="switchTab('sports')" data-tab="sports" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800/60">
+        <i class="fa-solid fa-dumbbell w-5 text-center"></i>
+        <span id="nav-sports">Спорт & Жаттығу</span>
+      </button>
+
+      <button onclick="switchTab('finance')" data-tab="finance" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800/60">
+        <i class="fa-solid fa-wallet w-5 text-center"></i>
+        <span id="nav-finance">Студент бюджеті</span>
+      </button>
+
+      <button onclick="switchTab('links')" data-tab="links" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800/60">
+        <i class="fa-solid fa-arrow-up-right-from-square w-5 text-center"></i>
+        <span id="nav-links">Порталдар & Сілтемелер</span>
+      </button>
+    </div>
+
+    <!-- Student Profile Footer -->
+    <div class="p-3 border-t border-slate-100 dark:border-zinc-800/80 bg-slate-50/50 dark:bg-zinc-900/50">
+      <div class="flex items-center gap-3 p-2 rounded-xl">
+        <div class="w-9 h-9 rounded-full bg-emerald-600/20 text-brand-700 dark:text-brand-400 flex items-center justify-center font-semibold text-sm">
+          <i class="fa-solid fa-user-graduate"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-semibold text-slate-800 dark:text-zinc-200 truncate">Computer Science '27</p>
+          <p id="profileSubText" class="text-[11px] text-slate-400 dark:text-zinc-500 truncate">Almaty • Семестр 4</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <div class="flex-1 flex flex-col h-full overflow-hidden">
+    
+    <!-- TOPBAR -->
+    <header class="h-16 px-4 md:px-8 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md flex items-center justify-between shrink-0 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar()" class="md:hidden p-2 text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg">
+          <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+
+        <!-- Search Bar -->
+        <div class="relative w-44 sm:w-72 md:w-96">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="globalSearchInput" oninput="handleGlobalSearch(this.value)" placeholder="Тапсырма, конспект, сабақ іздеу..." class="w-full pl-8 pr-4 py-1.5 text-xs rounded-xl bg-slate-100 dark:bg-zinc-800/70 border border-transparent focus:border-brand-600 focus:bg-white dark:focus:bg-zinc-900 focus:outline-none transition-all">
+          <div id="searchDropdown" class="hidden absolute top-full left-0 right-0 mt-1.5 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl overflow-hidden z-50 max-h-60 overflow-y-auto"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Live Clock in Asia/Almaty -->
+        <div class="hidden lg:flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400 font-medium px-2.5 py-1 rounded-xl bg-slate-100/80 dark:bg-zinc-800/40">
+          <i class="fa-regular fa-clock text-brand-600"></i>
+          <span id="liveClock">Loading...</span>
+        </div>
+
+        <!-- Language Selector -->
+        <div class="relative">
+          <select id="langSelector" onchange="changeLanguage(this.value)" class="text-xs font-bold py-1.5 px-2 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 focus:outline-none focus:border-brand-600 cursor-pointer shadow-xs">
+            <option value="kz">🇰🇿 KZ (Қазақша)</option>
+            <option value="ru">🇷🇺 RU (Русский)</option>
+            <option value="en">🇬🇧 EN (English)</option>
+          </select>
+        </div>
+
+        <!-- Notification Bell -->
+        <div class="relative">
+          <button onclick="toggleNotifications()" class="relative p-2 rounded-xl text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
+            <i class="fa-regular fa-bell text-sm"></i>
+            <span id="notifBadge" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          </button>
+          
+          <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl py-2 z-50">
+            <div class="px-4 py-2 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
+              <span id="notifHeaderTitle" class="font-bold text-xs">Хабарламалар мен Ескертулер</span>
+              <span id="notifClearBtn" class="text-[11px] text-brand-600 font-semibold cursor-pointer hover:underline" onclick="clearNotifs()">Тазарту</span>
+            </div>
+            <div id="notifList" class="max-h-72 overflow-y-auto divide-y divide-slate-100 dark:divide-zinc-800/60 text-xs"></div>
+          </div>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button onclick="toggleTheme()" class="p-2 rounded-xl text-slate-600 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">
+          <i id="themeIcon" class="fa-regular fa-moon text-sm"></i>
+        </button>
+
+        <!-- Header Quick Add -->
+        <button onclick="switchTab('tasks'); document.getElementById('taskInput').focus();" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-medium text-xs shadow-sm transition-all">
+          <i class="fa-solid fa-plus text-[10px]"></i>
+          <span id="headerNewTaskBtn">Жаңа тапсырма</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT WRAPPER -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+      <!-- ================= TAB: DASHBOARD ================= -->
+      <section id="tab-dashboard" class="tab-content block space-y-6">
+        
+        <!-- Welcome Hero Banner -->
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-950 via-brand-900 to-emerald-900 text-white p-6 sm:p-8 shadow-lg shadow-emerald-950/20">
+          <div class="relative z-10 max-w-2xl space-y-2">
+            <span id="heroTag" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 backdrop-blur-md text-emerald-200 border border-white/10">
+              <i class="fa-solid fa-sparkles text-amber-300 text-[10px]"></i> Академиялық семестр қызу жүріп жатыр
+            </span>
+            <h1 id="heroTitle" class="text-2xl sm:text-4xl font-extrabold tracking-tight">Маңызды істерге орын қалдыр.</h1>
+            <p id="heroSub" class="text-emerald-100/90 text-xs sm:text-sm font-light">Сабақ кестесін, емтихандарды, күнделікті тапсырмалар мен қатысуды бір жерде тиімді басқарыңыз.</p>
+          </div>
+          <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute right-10 top-6 hidden lg:block opacity-15 text-white text-9xl pointer-events-none">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+        </div>
+
+        <!-- Next Class Active Banner -->
+        <div id="nextClassWidget" class="p-5 rounded-2xl border transition-all duration-300 bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <!-- Dynamically populated via checkScheduleAlerts() -->
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 shadow-xs flex flex-col justify-between">
+            <span id="kpiLabelPending" class="text-xs font-semibold text-slate-400 dark:text-zinc-400 uppercase tracking-wider">Орындалмаған тапсырма</span>
+            <div class="flex items-baseline justify-between mt-2">
+              <span id="kpiPendingTasks" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">0</span>
+              <span class="text-xs text-amber-600 font-medium"><i class="fa-solid fa-clock-rotate-left mr-1"></i>To-Do</span>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 shadow-xs flex flex-col justify-between">
+            <span id="kpiLabelClasses" class="text-xs font-semibold text-slate-400 dark:text-zinc-400 uppercase tracking-wider">Бүгінгі сабақтар</span>
+            <div class="flex items-baseline justify-between mt-2">
+              <span id="kpiTodayClasses" class="text-2xl sm:text-3xl font-extrabold text-brand-700 dark:text-brand-400">0</span>
+              <span class="text-xs text-slate-500 font-medium"><i class="fa-regular fa-calendar-check mr-1"></i>Live</span>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 shadow-xs flex flex-col justify-between">
+            <span id="kpiLabelGpa" class="text-xs font-semibold text-slate-400 dark:text-zinc-400 uppercase tracking-wider">Жалпы GPA</span>
+            <div class="flex items-baseline justify-between mt-2">
+              <span id="kpiGpa" class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">3.75</span>
+              <span class="text-xs text-emerald-600 font-medium"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Honors</span>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 shadow-xs flex flex-col justify-between">
+            <span id="kpiLabelPomodoro" class="text-xs font-semibold text-slate-400 dark:text-zinc-400 uppercase tracking-wider">Бүгінгі Pomodoro</span>
+            <div class="flex items-baseline justify-between mt-2">
+              <span id="kpiPomodoros" class="text-2xl sm:text-3xl font-extrabold text-rose-600">0</span>
+              <span class="text-xs text-slate-500 font-medium"><i class="fa-solid fa-fire text-orange-500 mr-1"></i>Sessions</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-Column Split: Today's Schedule & Quick Tasks -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Today's Schedule Preview -->
+          <div class="lg:col-span-1 p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 shadow-xs space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 id="todayLecturesTitle" class="text-base font-bold text-slate-900 dark:text-white">Бүгінгі лекциялар</h2>
+                <p id="todayDateLabel" class="text-xs text-slate-400">Loading day...</p>
+              </div>
+              <button onclick="switchTab('schedule')" class="text-xs text-brand-600 hover:text-brand-700 font-semibold flex items-center gap-1">
+                <span id="viewAllScheduleBtn">Барлығы</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </button>
+            </div>
+            <div id="todaySchedulePreviewList" class="space-y-2.5"></div>
+          </div>
+
+          <!-- Quick Tasks Checklist -->
+          <div class="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 shadow-xs space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 id="priorityTasksTitle" class="text-base font-bold text-slate-900 dark:text-white">Басым тапсырмалар тізімі</h2>
+                <p id="priorityTasksSub" class="text-xs text-slate-400">Мерзімі жақын қалған тапсырмалар мен зертханалықтар</p>
+              </div>
+              <button onclick="switchTab('tasks')" class="text-xs text-brand-600 hover:text-brand-700 font-semibold flex items-center gap-1">
+                <span id="manageTasksBtn">Тапсырмалар менеджері</span> <i class="fa-solid fa-arrow-right text-[10px]"></i>
+              </button>
+            </div>
+
+            <!-- Quick Add Input -->
+            <form onsubmit="handleQuickTaskAdd(event)" class="flex gap-2">
+              <input type="text" id="dashboardQuickTaskInput" placeholder="Жылдам қосу: мысалы, Операциялық жүйелер зертханасын тапсыру..." class="flex-1 px-4 py-2 text-xs rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700/80 focus:border-brand-600 focus:outline-none">
+              <button type="submit" id="dashboardQuickAddBtn" class="px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold transition-all">Қосу</button>
+            </form>
+
+            <div id="dashboardTaskList" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <!-- Exam Countdown Ticker -->
+        <div class="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 shadow-xs space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+              <h2 id="examsCountdownTitle" class="text-base font-bold text-slate-900 dark:text-white">Алдағы емтихандар мен аралық бақылау</h2>
+            </div>
+            <button onclick="switchTab('tasks')" id="manageExamsBtn" class="text-xs text-brand-600 font-semibold hover:underline">Емтихандарды басқару</button>
+          </div>
+          <div id="examCountdownGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
+        </div>
+
+      </section>
+
+      <!-- ================= TAB: CLASS SCHEDULE ================= -->
+      <section id="tab-schedule" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 id="scheduleMainTitle" class="text-2xl font-bold text-slate-900 dark:text-white">Сабақ кестесі & Тұрақты апталық</h1>
+            <p id="scheduleMainSub" class="text-xs text-slate-500 dark:text-zinc-400">Апта күндері бойынша барлық пәндер, аудиториялар және уақыттар</p>
+          </div>
+          <button onclick="openClassModal()" id="addClassSlotBtn" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold shadow-sm transition-all self-start sm:self-auto">
+            <i class="fa-solid fa-plus"></i> Сабақ кестесіне қосу
+          </button>
+        </div>
+
+        <!-- Day Selector Pill Tabs -->
+        <div class="flex gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-zinc-800" id="scheduleDayPills">
+          <!-- Dynamically populated to sync language -->
+        </div>
+
+        <!-- Schedule Items List for Selected Day -->
+        <div id="scheduleTimeline" class="space-y-3"></div>
+      </section>
+
+      <!-- ================= TAB: TASKS & EXAMS ================= -->
+      <section id="tab-tasks" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 id="tasksMainTitle" class="text-2xl font-bold text-slate-900 dark:text-white">Тапсырмалар мен Емтихан</h1>
+            <p id="tasksMainSub" class="text-xs text-slate-500 dark:text-zinc-400">Үй жұмысы, рубеждік бақылау, жобалар және дедлайндар</p>
+          </div>
+          <!-- Filter Controls -->
+          <div class="flex items-center gap-1.5 bg-slate-200/80 dark:bg-zinc-800 p-1 rounded-xl text-xs">
+            <button onclick="setTaskFilter('all')" id="filterBtn-all" class="px-3 py-1 rounded-lg font-semibold bg-white dark:bg-zinc-700 text-slate-800 dark:text-white shadow-xs">Барлығы</button>
+            <button onclick="setTaskFilter('active')" id="filterBtn-active" class="px-3 py-1 rounded-lg font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900">Орындалатындар</button>
+            <button onclick="setTaskFilter('completed')" id="filterBtn-completed" class="px-3 py-1 rounded-lg font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900">Орындалғандар</button>
+            <button onclick="setTaskFilter('urgent')" id="filterBtn-urgent" class="px-3 py-1 rounded-lg font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900">Шұғыл</button>
+          </div>
+        </div>
+
+        <!-- Add Task Form Card -->
+        <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-xs">
+          <form onsubmit="handleAddTask(event)" class="space-y-3">
+            <div class="flex flex-col md:flex-row gap-3">
+              <input type="text" id="taskInput" required placeholder="Не істеу керек? (мысалы: Деректер қоры зертханасын тапсыру)" class="flex-1 px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 text-xs focus:outline-none focus:border-brand-600">
+              
+              <select id="taskPriority" class="px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 text-xs focus:outline-none">
+                <option value="Normal">Басымдық: Қалыпты</option>
+                <option value="Important">Басымдық: Маңызды</option>
+                <option value="Urgent">Басымдық: Шұғыл</option>
+              </select>
+
+              <select id="taskCategory" class="px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 text-xs focus:outline-none">
+                <option value="Study">📚 Оқу / Үй тапсырмасы</option>
+                <option value="Project">💻 Жоба / Зертханалық</option>
+                <option value="Exam">📝 Емтиханға дайындық</option>
+                <option value="Personal">🌱 Жеке / Кампус</option>
+              </select>
+
+              <input type="date" id="taskDueDate" class="px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200 dark:border-zinc-700 text-xs focus:outline-none">
+
+              <button type="submit" id="taskAddBtn" class="px-5 py-2.5 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs transition-all flex items-center justify-center gap-1.5 shrink-0">
+                <i class="fa-solid fa-plus"></i> Қосу
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Task List Items -->
+        <div id="fullTaskList" class="space-y-2"></div>
+
+        <!-- Separate Section: Exams & Tests Manager -->
+        <div class="pt-6 border-t border-slate-200 dark:border-zinc-800">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h2 id="examsScheduleSectionTitle" class="text-lg font-bold text-slate-900 dark:text-white">Емтихандар мен сынақтар кестесі</h2>
+              <p id="examsScheduleSectionSub" class="text-xs text-slate-500">Аралық және сессиялық емтихандар уақыты</p>
+            </div>
+            <button onclick="openExamModal()" id="registerExamBtn" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-xs font-semibold transition-all">
+              <i class="fa-solid fa-plus mr-1"></i> Емтихан тіркеу
+            </button>
+          </div>
+          <div id="fullExamList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: POMODORO TIMER ================= -->
+      <section id="tab-pomodoro" class="tab-content hidden space-y-6">
+        <div class="max-w-xl mx-auto text-center space-y-6">
+          <div>
+            <h1 id="pomoTitle" class="text-2xl font-bold text-slate-900 dark:text-white">Pomodoro Зейін Таймері</h1>
+            <p id="pomoSub" class="text-xs text-slate-500 dark:text-zinc-400">25 минут үздіксіз зейін қою және 5 минут демалыс әдісі</p>
+          </div>
+
+          <!-- Mode Selectors -->
+          <div class="inline-flex p-1.5 bg-slate-200/70 dark:bg-zinc-800 rounded-2xl gap-1">
+            <button onclick="setPomodoroMode('pomodoro')" id="pomoBtn-pomodoro" class="px-5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-zinc-700 text-brand-700 dark:text-brand-400 shadow-sm transition-all">Pomodoro (25м)</button>
+            <button onclick="setPomodoroMode('short')" id="pomoBtn-short" class="px-5 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 transition-all">Қысқа үзіліс (5м)</button>
+            <button onclick="setPomodoroMode('long')" id="pomoBtn-long" class="px-5 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 transition-all">Ұзақ демалыс (15м)</button>
+          </div>
+
+          <!-- Circular Timer Display -->
+          <div class="relative w-72 h-72 mx-auto flex items-center justify-center">
+            <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="6" class="text-slate-200 dark:text-zinc-800" fill="transparent"/>
+              <circle id="pomoCircleProgress" cx="50" cy="50" r="42" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="0" class="text-brand-600 transition-all duration-500" fill="transparent"/>
+            </svg>
+            <div class="absolute flex flex-col items-center">
+              <span id="timerDisplay" class="text-5xl font-black tracking-tight text-slate-900 dark:text-white font-mono">25:00</span>
+              <span id="timerStatusLabel" class="text-xs font-semibold uppercase tracking-wider text-slate-400 mt-1">Зейін қою уақыты</span>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="flex items-center justify-center gap-4">
+            <button onclick="toggleTimer()" id="timerStartBtn" class="px-8 py-3 rounded-2xl bg-brand-700 hover:bg-brand-800 text-white font-bold text-sm shadow-lg shadow-brand-700/30 transition-all">
+              <i class="fa-solid fa-play mr-2"></i> Бастау
+            </button>
+            <button onclick="resetTimer()" class="p-3 rounded-2xl border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300 transition-all" title="Reset">
+              <i class="fa-solid fa-rotate-right"></i>
+            </button>
+            <button onclick="toggleAudioSound()" id="soundToggleBtn" class="p-3 rounded-2xl border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300 transition-all" title="Toggle Sound">
+              <i class="fa-solid fa-volume-high"></i>
+            </button>
+          </div>
+
+          <!-- Streak Summary -->
+          <div class="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center justify-around text-xs">
+            <div>
+              <p id="pomoDoneLabel" class="text-slate-400">Аяқталған сессия</p>
+              <p id="pomoSessionsCount" class="text-lg font-bold text-slate-800 dark:text-white">0</p>
+            </div>
+            <div class="w-px h-8 bg-slate-200 dark:bg-zinc-800"></div>
+            <div>
+              <p id="pomoMinsLabel" class="text-slate-400">Фокус уақыты</p>
+              <p id="pomoMinutesCount" class="text-lg font-bold text-brand-600">0 мин</p>
+            </div>
+            <div class="w-px h-8 bg-slate-200 dark:bg-zinc-800"></div>
+            <div>
+              <p id="pomoTargetLabel" class="text-slate-400">Күндік мақсат</p>
+              <p class="text-lg font-bold text-amber-500">4 цикл</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: GPA CALCULATOR ================= -->
+      <section id="tab-gpa" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 id="gpaTitle" class="text-2xl font-bold text-slate-900 dark:text-white">GPA және Үлгерім Есептегіш</h1>
+            <p id="gpaSub" class="text-xs text-slate-500 dark:text-zinc-400">Кредиттер салмағымен 4.0 шкаласы бойынша орташа баллды автоматты есептеу</p>
+          </div>
+          <button onclick="addGpaCourseRow()" id="addGpaSubjectBtn" class="px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold transition-all">
+            <i class="fa-solid fa-plus mr-1"></i> Пән қосу
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-xs space-y-4">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead>
+                  <tr class="border-b border-slate-200 dark:border-zinc-800 text-slate-400 uppercase tracking-wider font-semibold">
+                    <th class="pb-3" id="thSubject">Пән атауы</th>
+                    <th class="pb-3 w-28" id="thCredits">Кредит (ECTS)</th>
+                    <th class="pb-3 w-36" id="thGrade">Баға</th>
+                    <th class="pb-3 w-12 text-center" id="thAction">Әрекет</th>
+                  </tr>
+                </thead>
+                <tbody id="gpaCourseRows" class="divide-y divide-slate-100 dark:divide-zinc-800/60"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="p-6 rounded-2xl bg-gradient-to-br from-white to-brand-50/50 dark:from-zinc-900 dark:to-brand-950/20 border border-brand-200 dark:border-brand-900/50 shadow-xs space-y-4">
+              <span id="gpaResLabel" class="text-xs font-bold text-brand-800 dark:text-brand-400 uppercase tracking-wider">Есептелген нәтиже</span>
+              
+              <div class="flex items-baseline justify-between">
+                <span id="gpaSemLabel" class="text-slate-500 text-sm">Семестр GPA</span>
+                <span id="calculatedGpaDisplay" class="text-4xl font-black text-brand-700 dark:text-brand-400">3.75</span>
+              </div>
+
+              <div class="flex items-center justify-between text-xs text-slate-500 py-1 border-y border-brand-100 dark:border-brand-900/40">
+                <span id="gpaCreditsTotalLabel">Жалпы кредиттер:</span>
+                <span id="totalCreditsDisplay" class="font-bold text-slate-800 dark:text-white">18 ECTS</span>
+              </div>
+
+              <div class="flex items-center justify-between text-xs text-slate-500">
+                <span id="gpaStatusLabel">Академиялық дәреже:</span>
+                <span id="gpaStandingBadge" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">Үздік / Honors</span>
+              </div>
+
+              <p id="gpaFormulaDesc" class="text-[11px] text-slate-400 leading-relaxed">
+                Формула: (Пән кредиті × Баға баллы) қосындысы / Жалпы кредиттер саны. Барлық деректер автоматты сақталады.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: ATTENDANCE TRACKER ================= -->
+      <section id="tab-attendance" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 id="attTitle" class="text-2xl font-bold text-slate-900 dark:text-white">Сабаққа қатысу журналы</h1>
+            <p id="attSub" class="text-xs text-slate-500 dark:text-zinc-400">Университеттің 80% міндетті шегін бақылау және қадағалау</p>
+          </div>
+          <button onclick="openAttendanceModal()" id="attAddCourseBtn" class="px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold transition-all">
+            <i class="fa-solid fa-plus mr-1"></i> Жаңа пән қосу
+          </button>
+        </div>
+
+        <div id="attendanceGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </section>
+
+      <!-- ================= TAB: STUDY NOTES ================= -->
+      <section id="tab-notes" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 id="notesTitle" class="text-2xl font-bold text-slate-900 dark:text-white">Конспекттер & Құжаттар</h1>
+            <p id="notesSub" class="text-xs text-slate-500 dark:text-zinc-400">Дәрістер тезисі, шпаргалкалар және емтихан конспектілері</p>
+          </div>
+          <button onclick="createNewNote()" id="newDocBtn" class="px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold transition-all">
+            <i class="fa-solid fa-plus mr-1"></i> Жаңа құжат
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Notes List Sidebar -->
+          <div class="p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-3">
+            <input type="text" id="notesSearchInput" oninput="filterNotes(this.value)" placeholder="Конспекттерден іздеу..." class="w-full px-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:outline-none">
+            <div id="notesItemList" class="space-y-2 max-h-[500px] overflow-y-auto"></div>
+          </div>
+
+          <!-- Note Editor Active Area -->
+          <div class="lg:col-span-2 p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+            <div class="flex items-center justify-between gap-3">
+              <input type="text" id="noteTitleInput" placeholder="Құжат атауы..." class="text-lg font-bold bg-transparent border-b border-transparent focus:border-brand-600 focus:outline-none text-slate-900 dark:text-white w-full">
+              <button onclick="saveActiveNote()" id="noteSaveBtn" class="px-5 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-semibold text-xs shrink-0 flex items-center gap-1.5 shadow-sm">
+                <i class="fa-regular fa-floppy-disk"></i> Сақтау
+              </button>
+            </div>
+            
+            <div class="flex gap-2">
+              <input type="text" id="noteTagInput" placeholder="Тег: #Алгоритмдер, #ОЖ" class="text-xs px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:outline-none">
+            </div>
+
+            <textarea id="noteBodyInput" rows="14" placeholder="Конспект мәтінін осында жазыңыз..." class="w-full p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-200 dark:border-zinc-700/80 text-xs text-slate-800 dark:text-zinc-200 font-mono focus:outline-none focus:border-brand-600 resize-none"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: FLASHCARDS ================= -->
+      <section id="tab-flashcards" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 id="flashTitle" class="text-2xl font-bold text-slate-900 dark:text-white">Флэшкарталар & Жаттау</h1>
+            <p id="flashSub" class="text-xs text-slate-500 dark:text-zinc-400">Терминдерді, формулаларды жылдам есте сақтау әдісі</p>
+          </div>
+          <button onclick="openFlashcardModal()" id="addFlashBtn" class="px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold transition-all">
+            <i class="fa-solid fa-plus mr-1"></i> Карта қосу
+          </button>
+        </div>
+
+        <div class="max-w-xl mx-auto space-y-6">
+          <div class="perspective-1000 w-full h-72 cursor-pointer" onclick="flipActiveCard()">
+            <div id="flashcardInner" class="relative w-full h-full duration-500 transform-style-preserve-3d shadow-md rounded-3xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col justify-between p-8 text-center">
+              
+              <!-- Front -->
+              <div class="backface-hidden absolute inset-0 flex flex-col justify-between p-8">
+                <span id="flashTermLabel" class="text-xs font-bold text-brand-600 uppercase tracking-wider">Сұрақ / Термин</span>
+                <p id="cardFrontText" class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white my-auto">What is Polymorphism?</p>
+                <span id="flashFlipHint" class="text-[11px] text-slate-400"><i class="fa-solid fa-rotate mr-1"></i> Төңкеру үшін басыңыз</span>
+              </div>
+
+              <!-- Back -->
+              <div class="backface-hidden absolute inset-0 flex flex-col justify-between p-8 rotate-y-180 bg-brand-900 text-white rounded-3xl">
+                <span id="flashAnswerLabel" class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Жауап / Анықтама</span>
+                <p id="cardBackText" class="text-sm sm:text-base font-medium my-auto leading-relaxed">Арнайы интерфейс арқылы әртүрлі нысандардың біртекті әрекет жасауы.</p>
+                <span id="flashNextHint" class="text-[11px] text-emerald-200"><i class="fa-solid fa-check mr-1"></i> Есте сақтадыңыз ба?</span>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between px-2">
+            <button onclick="prevFlashcard()" id="fcPrevBtn" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-xs font-semibold">
+              <i class="fa-solid fa-arrow-left mr-1"></i> Алдыңғы
+            </button>
+            <span id="cardCounter" class="text-xs font-bold text-slate-500">Карта 1 / 3</span>
+            <button onclick="nextFlashcard()" id="fcNextBtn" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800 text-xs font-semibold">
+              Келесі <i class="fa-solid fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: SPORTS & GYM LOG ================= -->
+      <section id="tab-sports" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 id="sportsTitle" class="text-2xl font-bold text-slate-900 dark:text-white">Спорт & Жаттығу журналы</h1>
+            <p id="sportsSub" class="text-xs text-slate-500 dark:text-zinc-400">Университет секциялары, залдағы жаттығулар мен белсенділік</p>
+          </div>
+          <button onclick="openWorkoutModal()" id="sportsAddBtn" class="px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold transition-all">
+            <i class="fa-solid fa-plus mr-1"></i> Жаттығу жазу
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
+            <span id="sportGoalLabel" class="text-xs text-slate-400 uppercase font-semibold">Апталық мақсат</span>
+            <div class="mt-2 flex items-baseline justify-between">
+              <span id="workoutWeeklyCount" class="text-2xl font-bold text-slate-900 dark:text-white">3 / 4 күн</span>
+              <span class="text-xs text-emerald-600 font-bold">75%</span>
+            </div>
+            <div class="w-full bg-slate-100 dark:bg-zinc-800 h-2 rounded-full mt-3 overflow-hidden">
+              <div class="bg-brand-600 h-full w-3/4 rounded-full"></div>
+            </div>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
+            <span id="sportTypeLabel" class="text-xs text-slate-400 uppercase font-semibold">Басты бағыт</span>
+            <div class="mt-2 text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <i class="fa-solid fa-dumbbell text-brand-600"></i> Тренажер залы
+            </div>
+            <p id="sportLocationLabel" class="text-[11px] text-slate-400 mt-2">Кампус спорт кешені</p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
+            <span id="sportStreakLabel" class="text-xs text-slate-400 uppercase font-semibold">Белсенділік сериясы</span>
+            <div class="mt-2 text-xl font-bold text-amber-500 flex items-center gap-2">
+              <i class="fa-solid fa-fire"></i> 12 күн
+            </div>
+            <p id="sportStreakSub" class="text-[11px] text-slate-400 mt-2">Оқуға жақсы сергектік береді</p>
+          </div>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+          <h2 id="recentWorkoutsTitle" class="text-base font-bold text-slate-900 dark:text-white">Соңғы жаттығулар</h2>
+          <div id="workoutLogList" class="space-y-3"></div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: FINANCE ================= -->
+      <section id="tab-finance" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 id="finTitleMain" class="text-2xl font-bold text-slate-900 dark:text-white">Студент бюджеті & Шығындар</h1>
+            <p id="finSubMain" class="text-xs text-slate-500 dark:text-zinc-400">Шәкіртақы, асхана, жолақы және оқу құралдары шығыны</p>
+          </div>
+          <button onclick="openFinanceModal()" id="finAddBtn" class="px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold transition-all">
+            <i class="fa-solid fa-plus mr-1"></i> Шығын жазу
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
+            <span id="finMonthlyLabel" class="text-xs text-slate-400 font-semibold uppercase">Айлық бюджет</span>
+            <p id="financeTotalBudget" class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">150,000 ₸</p>
+          </div>
+          <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
+            <span id="finSpentLabel" class="text-xs text-slate-400 font-semibold uppercase">Жұмсалғаны</span>
+            <p id="financeTotalSpent" class="text-2xl font-extrabold text-rose-600 mt-1">45,200 ₸</p>
+          </div>
+          <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800">
+            <span id="finLeftLabel" class="text-xs text-slate-400 font-semibold uppercase">Қалған қаражат</span>
+            <p id="financeRemaining" class="text-2xl font-extrabold text-emerald-600 mt-1">104,800 ₸</p>
+          </div>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-4">
+          <h2 id="finHistoryTitle" class="text-base font-bold text-slate-900 dark:text-white">Транзакциялар тарихы</h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead>
+                <tr class="border-b border-slate-200 dark:border-zinc-800 text-slate-400 uppercase font-semibold">
+                  <th class="pb-3" id="thFinDesc">Сипаттама</th>
+                  <th class="pb-3" id="thFinCat">Санат</th>
+                  <th class="pb-3" id="thFinDate">Күні</th>
+                  <th class="pb-3 text-right" id="thFinAmount">Сомасы</th>
+                  <th class="pb-3 w-10 text-center" id="thFinAct">Әрекет</th>
+                </tr>
+              </thead>
+              <tbody id="financeTableBody" class="divide-y divide-slate-100 dark:divide-zinc-800/60"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: USEFUL LINKS ================= -->
+      <section id="tab-links" class="tab-content hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 id="linksTitleMain" class="text-2xl font-bold text-slate-900 dark:text-white">Порталдар & Пайдалы Сілтемелер</h1>
+            <p id="linksSubMain" class="text-xs text-slate-500 dark:text-zinc-400">Студенттік портал, Moodle, электронды кітапхана сілтемелері</p>
+          </div>
+          <button onclick="openLinkModal()" id="linkAddBtn" class="px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white text-xs font-semibold transition-all">
+            <i class="fa-solid fa-plus mr-1"></i> Сілтеме қосу
+          </button>
+        </div>
+
+        <div id="linksGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODALS -->
+  <!-- 1. Class Slot Modal -->
+  <div id="modalClass" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h3 id="modalClassTitle" class="font-bold text-base text-slate-900 dark:text-white">Сабақ кестесіне қосу</h3>
+        <button onclick="closeModal('modalClass')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="handleSaveClass(event)" class="space-y-3 text-xs">
+        <div>
+          <label id="lblClassSubject" class="block font-medium mb-1">Пән атауы</label>
+          <input type="text" id="classSubject" required placeholder="мысалы: Деректер құрылымы және алгоритмдер" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label id="lblClassDay" class="block font-medium mb-1">Апта күні</label>
+            <select id="classDay" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+              <option value="Monday">Дүйсенбі / Monday</option>
+              <option value="Tuesday">Сейсенбі / Tuesday</option>
+              <option value="Wednesday">Сәрсенбі / Wednesday</option>
+              <option value="Thursday">Бейсенбі / Thursday</option>
+              <option value="Friday">Жұма / Friday</option>
+              <option value="Saturday">Сенбі / Saturday</option>
+            </select>
+          </div>
+          <div>
+            <label id="lblClassRoom" class="block font-medium mb-1">Аудитория</label>
+            <input type="text" id="classRoom" placeholder="Аудитория 301" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label id="lblClassStart" class="block font-medium mb-1">Басталу уақыты</label>
+            <input type="time" id="classStartTime" required value="09:00" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+          </div>
+          <div>
+            <label id="lblClassEnd" class="block font-medium mb-1">Аяқталу уақыты</label>
+            <input type="time" id="classEndTime" required value="10:30" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+          </div>
+        </div>
+        <div>
+          <label id="lblClassProf" class="block font-medium mb-1">Оқытушы</label>
+          <input type="text" id="classProf" placeholder="доцент Ахметов Б. К." class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modalClass')" class="modalCancelBtn px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 font-semibold">Бас тарту</button>
+          <button type="submit" class="modalSaveBtn px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-semibold">Сақтау</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Exam Modal -->
+  <div id="modalExam" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h3 id="modalExamTitle" class="font-bold text-base text-slate-900 dark:text-white">Емтиханды тіркеу</h3>
+        <button onclick="closeModal('modalExam')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="handleSaveExam(event)" class="space-y-3 text-xs">
+        <div>
+          <label id="lblExamTitle" class="block font-medium mb-1">Емтихан немесе сынақ атауы</label>
+          <input type="text" id="examTitle" required placeholder="мысалы: Алгоритмдер аралық бақылау (Midterm)" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label id="lblExamDate" class="block font-medium mb-1">Күні</label>
+            <input type="date" id="examDate" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+          </div>
+          <div>
+            <label id="lblExamRoom" class="block font-medium mb-1">Аудитория / Формат</label>
+            <input type="text" id="examRoom" placeholder="Аудитория 104 / Компьютер" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modalExam')" class="modalCancelBtn px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 font-semibold">Бас тарту</button>
+          <button type="submit" class="modalSaveBtn px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-semibold">Сақтау</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Attendance Modal -->
+  <div id="modalAttendance" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h3 id="modalAttTitle" class="font-bold text-base text-slate-900 dark:text-white">Қатысу журналына пән қосу</h3>
+        <button onclick="closeModal('modalAttendance')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="handleSaveAttendance(event)" class="space-y-3 text-xs">
+        <div>
+          <label id="lblAttSubject" class="block font-medium mb-1">Пән атауы</label>
+          <input type="text" id="attSubject" required placeholder="мысалы: Жасанды интеллект негіздері" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label id="lblAttAttended" class="block font-medium mb-1">Қатысқан сабақ саны</label>
+            <input type="number" id="attPresent" value="12" min="0" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+          </div>
+          <div>
+            <label id="lblAttTotal" class="block font-medium mb-1">Жалпы сабақ саны</label>
+            <input type="number" id="attTotal" value="14" min="1" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modalAttendance')" class="modalCancelBtn px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 font-semibold">Бас тарту</button>
+          <button type="submit" class="modalSaveBtn px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-semibold">Сақтау</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Flashcard Modal -->
+  <div id="modalFlashcard" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h3 id="modalFcTitle" class="font-bold text-base text-slate-900 dark:text-white">Флэшкарта жасау</h3>
+        <button onclick="closeModal('modalFlashcard')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="handleSaveFlashcard(event)" class="space-y-3 text-xs">
+        <div>
+          <label id="lblFcFront" class="block font-medium mb-1">Сұрақ немесе термин</label>
+          <input type="text" id="fcFront" required placeholder="мысалы: Амдал заңы деген не?" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+        </div>
+        <div>
+          <label id="lblFcBack" class="block font-medium mb-1">Жауап немесе түсіндірме</label>
+          <textarea id="fcBack" rows="3" required placeholder="Анықтамасы немесе формуласы..." class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modalFlashcard')" class="modalCancelBtn px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 font-semibold">Бас тарту</button>
+          <button type="submit" class="modalSaveBtn px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-semibold">Сақтау</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 5. Workout Modal -->
+  <div id="modalWorkout" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h3 id="modalWoTitle" class="font-bold text-base text-slate-900 dark:text-white">Жаттығуды жазу</h3>
+        <button onclick="closeModal('modalWorkout')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="handleSaveWorkout(event)" class="space-y-3 text-xs">
+        <div>
+          <label id="lblWoTitle" class="block font-medium mb-1">Жаттығу түрі / Атауы</label>
+          <input type="text" id="woTitle" required placeholder="мысалы: Арқа және иық жаттығулары немесе 5 шақырым жүгіру" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label id="lblWoCat" class="block font-medium mb-1">Санаты</label>
+            <select id="woCategory" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+              <option value="Тренажер залы">Тренажер залы / Gym</option>
+              <option value="Жүгіру / Кардио">Жүгіру / Cardio</option>
+              <option value="Футбол / Баскетбол">Футбол / Баскетбол</option>
+              <option value="Жүзу">Жүзу / Swimming</option>
+            </select>
+          </div>
+          <div>
+            <label id="lblWoDur" class="block font-medium mb-1">Ұзақтығы (мин)</label>
+            <input type="number" id="woDuration" value="50" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modalWorkout')" class="modalCancelBtn px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 font-semibold">Бас тарту</button>
+          <button type="submit" class="modalSaveBtn px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-semibold">Сақтау</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. Finance Modal -->
+  <div id="modalFinance" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h3 id="modalFinTitle" class="font-bold text-base text-slate-900 dark:text-white">Шығын немесе кіріс қосу</h3>
+        <button onclick="closeModal('modalFinance')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="handleSaveFinance(event)" class="space-y-3 text-xs">
+        <div>
+          <label id="lblFinTitle" class="block font-medium mb-1">Шығын сипаттамасы</label>
+          <input type="text" id="finTitle" required placeholder="мысалы: Университет асханасынан түскі ас" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label id="lblFinAmount" class="block font-medium mb-1">Сомасы (₸)</label>
+            <input type="number" id="finAmount" required placeholder="1800" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+          </div>
+          <div>
+            <label id="lblFinCat" class="block font-medium mb-1">Санаты</label>
+            <select id="finCategory" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+              <option value="Тамақтану">Тамақтану / Food</option>
+              <option value="Оқулықтар">Оқулықтар / Academic</option>
+              <option value="Жолақы">Жолақы / Transport</option>
+              <option value="Демалыс">Демалыс / Leisure</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modalFinance')" class="modalCancelBtn px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 font-semibold">Бас тарту</button>
+          <button type="submit" class="modalSaveBtn px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-semibold">Сақтау</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 7. Bookmark Link Modal -->
+  <div id="modalLink" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h3 id="modalLinkTitle" class="font-bold text-base text-slate-900 dark:text-white">Портал сілтемесін қосу</h3>
+        <button onclick="closeModal('modalLink')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="handleSaveLink(event)" class="space-y-3 text-xs">
+        <div>
+          <label id="lblLinkName" class="block font-medium mb-1">Портал немесе ресурс атауы</label>
+          <input type="text" id="linkName" required placeholder="мысалы: Университет кітапханасы" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+        </div>
+        <div>
+          <label id="lblLinkUrl" class="block font-medium mb-1">Сілтемесі (URL)</label>
+          <input type="url" id="linkUrl" required placeholder="https://..." class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeModal('modalLink')" class="modalCancelBtn px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 font-semibold">Бас тарту</button>
+          <button type="submit" class="modalSaveBtn px-4 py-2 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-semibold">Сақтау</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- JAVASCRIPT SYSTEM ENGINE -->
+  <script>
+    /* =========================================================================
+       1. MULTI-LINGUAL TRILINGUAL DICTIONARY (KZ, RU, EN)
+       ========================================================================= */
+    const i18n = {
+      kz: {
+        workspaceSub: 'Студент Жұмыс Орны',
+        coreTools: 'Негізгі құралдар',
+        dashboard: 'Басты бет',
+        schedule: 'Сабақ кестесі',
+        tasks: 'Тапсырмалар мен Емтихан',
+        pomodoro: 'Pomodoro Таймері',
+        gpa: 'GPA Есептегіш',
+        attendance: 'Қатысу журналы',
+        studentLife: 'Студенттік өмір & Оқу',
+        notes: 'Конспекттер & Құжаттар',
+        flashcards: 'Флэшкарталар',
+        sports: 'Спорт & Жаттығу',
+        finance: 'Студент бюджеті',
+        links: 'Порталдар & Сілтемелер',
+        searchPlaceholder: 'Тапсырма, конспект, сабақ іздеу...',
+        heroTag: 'Академиялық семестр қызу жүріп жатыр',
+        heroTitle: 'Маңызды істерге орын қалдыр.',
+        heroSub: 'Сабақ кестесін, емтихандарды, күнделікті тапсырмалар мен қатысуды бір жерде тиімді басқарыңыз.',
+        kpiPending: 'Орындалмаған тапсырма',
+        kpiClasses: 'Бүгінгі сабақтар',
+        kpiGpa: 'Жалпы GPA',
+        kpiPomodoro: 'Бүгінгі Pomodoro',
+        todayLectures: 'Бүгінгі лекциялар',
+        viewAll: 'Барлығы',
+        priorityTasks: 'Басым тапсырмалар тізімі',
+        prioritySub: 'Мерзімі жақын қалған тапсырмалар мен зертханалықтар',
+        manageTasks: 'Тапсырмалар менеджері',
+        quickAddPlace: 'Жылдам қосу: мысалы, Операциялық жүйелер зертханасын тапсыру...',
+        addBtn: 'Қосу',
+        newTaskBtn: 'Жаңа тапсырма',
+        examsCountdown: 'Алдағы емтихандар мен аралық бақылау',
+        manageExams: 'Емтихандарды басқару',
+        all: 'Барлығы',
+        todo: 'Орындалатындар',
+        completed: 'Орындалғандар',
+        urgent: 'Шұғыл',
+        focusTime: 'Зейін қою уақыты',
+        shortBreak: 'Қысқа үзіліс (5м)',
+        longBreak: 'Ұзақ демалыс (15м)',
+        start: 'Бастау',
+        pause: 'Үзіліс',
+        cancel: 'Бас тарту',
+        save: 'Сақтау',
+        liveNow: 'ДӘЛ ҚАЗІР ӨТІП ЖАТЫР',
+        nextClass: 'КЕЛЕСІ САБАҚ',
+        noMoreClassesToday: 'Бүгінге басқа сабақ жоқ! Демалыңыз немесе конспект қайталаңыз.',
+        startsIn: 'Басталуына',
+        endsIn: 'Аяқталуына',
+        hours: 'сағ',
+        mins: 'мин',
+        classStartedNotif: 'Сабақ басталды!',
+        classEndingSoonNotif: 'Сабақтың аяқталуына 5 минут қалды!',
+        attendedBtn: '+ Қатыстым',
+        missedBtn: '+ Қалдым',
+        belowAttReq: 'Университеттің 80% шегінен төмен!',
+        days: ['Дүйсенбі', 'Сейсенбі', 'Сәрсенбі', 'Бейсенбі', 'Жұма', 'Сенбі']
+      },
+      ru: {
+        workspaceSub: 'Студенческое пространство',
+        coreTools: 'Основные инструменты',
+        dashboard: 'Главная панель',
+        schedule: 'Расписание занятий',
+        tasks: 'Задачи и экзамены',
+        pomodoro: 'Помодоро таймер',
+        gpa: 'Калькулятор GPA',
+        attendance: 'Журнал посещаемости',
+        studentLife: 'Студенческая жизнь и учеба',
+        notes: 'Конспекты и документы',
+        flashcards: 'Флэш-карточки',
+        sports: 'Спорт и тренировки',
+        finance: 'Студенческий бюджет',
+        links: 'Порталы и ссылки',
+        searchPlaceholder: 'Поиск задач, заметок, предметов...',
+        heroTag: 'Академический семестр в самом разгаре',
+        heroTitle: 'Освободи время для главного.',
+        heroSub: 'Планируйте учебу, отслеживайте экзамены, контролируйте посещаемость и дедлайны.',
+        kpiPending: 'Ожидающие задачи',
+        kpiClasses: 'Занятия сегодня',
+        kpiGpa: 'Текущий GPA',
+        kpiPomodoro: 'Pomodoro сегодня',
+        todayLectures: 'Лекции на сегодня',
+        viewAll: 'Все',
+        priorityTasks: 'Приоритетные задачи',
+        prioritySub: 'Срочные задания и дедлайны, требующие внимания',
+        manageTasks: 'Менеджер задач',
+        quickAddPlace: 'Быстрое добавление: например, сдать лабораторную по ОС...',
+        addBtn: 'Добавить',
+        newTaskBtn: 'Новая задача',
+        examsCountdown: 'Обратный отсчет до экзаменов',
+        manageExams: 'Управление экзаменами',
+        all: 'Все',
+        todo: 'К выполнению',
+        completed: 'Завершенные',
+        urgent: 'Срочные',
+        focusTime: 'Время фокуса',
+        shortBreak: 'Короткий перерыв (5м)',
+        longBreak: 'Длинный перерыв (15м)',
+        start: 'Старт',
+        pause: 'Пауза',
+        cancel: 'Отмена',
+        save: 'Сохранить',
+        liveNow: 'ИДЕТ ПРЯМО СЕЙЧАС',
+        nextClass: 'СЛЕДУЮЩЕЕ ЗАНЯТИЕ',
+        noMoreClassesToday: 'На сегодня больше пар нет! Отдыхайте или учите конспекты.',
+        startsIn: 'До начала',
+        endsIn: 'До конца',
+        hours: 'ч',
+        mins: 'мин',
+        classStartedNotif: 'Занятие началось!',
+        classEndingSoonNotif: 'До конца пары осталось 5 минут!',
+        attendedBtn: '+ Был',
+        missedBtn: '+ Пропуск',
+        belowAttReq: 'Ниже обязательного порога 80%!',
+        days: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']
+      },
+      en: {
+        workspaceSub: 'Student Workspace',
+        coreTools: 'Core Tools',
+        dashboard: 'Dashboard',
+        schedule: 'Class Schedule',
+        tasks: 'Tasks & Exams',
+        pomodoro: 'Pomodoro Focus',
+        gpa: 'GPA Calculator',
+        attendance: 'Attendance Log',
+        studentLife: 'Student Life & Study',
+        notes: 'Study Notes & Docs',
+        flashcards: 'Flashcards & Study',
+        sports: 'Sports & Gym Log',
+        finance: 'Student Budget',
+        links: 'Portals & Links',
+        searchPlaceholder: 'Search tasks, notes, courses...',
+        heroTag: 'Academic Semester in Full Swing',
+        heroTitle: 'Make room for what matters.',
+        heroSub: 'Plan your coursework, keep track of exams and class attendance, and stay focused daily.',
+        kpiPending: 'Pending Tasks',
+        kpiClasses: "Today's Classes",
+        kpiGpa: 'Overall GPA',
+        kpiPomodoro: 'Pomodoro Today',
+        todayLectures: "Today's Lectures",
+        viewAll: 'View All',
+        priorityTasks: 'Priority Task Checklist',
+        prioritySub: 'Urgent assignments & deliverables due soon',
+        manageTasks: 'Task Manager',
+        quickAddPlace: 'Quick capture: e.g., Submit Operating Systems lab...',
+        addBtn: 'Add',
+        newTaskBtn: 'New Task',
+        examsCountdown: 'Upcoming Exams & Midterms Countdown',
+        manageExams: 'Manage Exams',
+        all: 'All',
+        todo: 'To-Do',
+        completed: 'Completed',
+        urgent: 'Urgent',
+        focusTime: 'Focus Time',
+        shortBreak: 'Short Break (5m)',
+        longBreak: 'Long Break (15m)',
+        start: 'Start',
+        pause: 'Pause',
+        cancel: 'Cancel',
+        save: 'Save',
+        liveNow: 'HAPPENING RIGHT NOW',
+        nextClass: 'NEXT UPCOMING CLASS',
+        noMoreClassesToday: 'No more classes scheduled for today! Great job.',
+        startsIn: 'Starts in',
+        endsIn: 'Ends in',
+        hours: 'h',
+        mins: 'm',
+        classStartedNotif: 'Class has started!',
+        classEndingSoonNotif: '5 minutes remaining in class!',
+        attendedBtn: '+ Present',
+        missedBtn: '+ Missed',
+        belowAttReq: 'Below mandatory 80% attendance threshold!',
+        days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      }
+    };
+
+    const dayKeys = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    /* =========================================================================
+       2. INITIAL SEED DATA & LOCALSTORAGE SYNC
+       ========================================================================= */
+    function loadState(key, fallback) {
+      try {
+        const stored = localStorage.getItem(`tf_${key}`);
+        return stored ? JSON.parse(stored) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    function saveState(key, value) {
+      try {
+        localStorage.setItem(`tf_${key}`, JSON.stringify(value));
+      } catch (e) {
+        console.error('Storage error', e);
+      }
+    }
+
+    let currentLang = localStorage.getItem('tf_lang') || 'kz';
+
+    const defaultClasses = [
+      { id: 'c1', subject: 'Data Structures & Algorithms', day: 'Monday', startTime: '09:00', endTime: '10:30', room: 'Hall 301', prof: 'Dr. Kimberly Adams' },
+      { id: 'c2', subject: 'Linear Algebra & Discrete Math', day: 'Monday', startTime: '11:00', endTime: '12:30', room: 'Auditorium A', prof: 'Prof. David Vance' },
+      { id: 'c3', subject: 'Computer Architecture & Assembly', day: 'Tuesday', startTime: '10:00', endTime: '11:30', room: 'Lab 104', prof: 'Dr. Angela Rossi' },
+      { id: 'c4', subject: 'Operating Systems & Concurrency', day: 'Wednesday', startTime: '09:00', endTime: '10:30', room: 'Hall 205', prof: 'Prof. Robert Chen' },
+      { id: 'c5', subject: 'Web Systems & Fullstack Architecture', day: 'Thursday', startTime: '13:00', endTime: '14:30', room: 'Hall 108', prof: 'Dr. Sarah Connor' },
+      { id: 'c6', subject: 'Database Management Systems', day: 'Friday', startTime: '11:00', endTime: '12:30', room: 'Hall 402', prof: 'Dr. Kimberly Adams' }
+    ];
+
+    const defaultTasks = [
+      { id: '1', title: 'Операциялық жүйелер №4 зертханалықты қорғау', priority: 'Urgent', category: 'Project', dueDate: '2026-11-12', completed: false },
+      { id: '2', title: 'Сызықтық алгебра конспектісін қайталау', priority: 'Important', category: 'Study', dueDate: '2026-11-14', completed: false },
+      { id: '3', title: 'Кітапханаға Деректер Қоры кітабын өткізу', priority: 'Normal', category: 'Personal', dueDate: '2026-11-16', completed: true }
+    ];
+
+    const defaultExams = [
+      { id: 'e1', title: 'Data Structures Midterm Examination', date: '2026-11-18', room: 'Hall 101' },
+      { id: 'e2', title: 'Operating Systems Quiz 2', date: '2026-11-24', room: 'Lab 2' },
+      { id: 'e3', title: 'Linear Algebra Final Exam', date: '2026-12-05', room: 'Auditorium Central' }
+    ];
+
+    const defaultNotes = [
+      { id: 'n1', title: 'DSA: Tree Traversal Cheat Sheet', tag: '#Algorithms', body: 'Tree traversals:\n- Inorder: Left, Root, Right (Yields sorted order in BST)\n- Preorder: Root, Left, Right (Good for copying tree)\n- Postorder: Left, Right, Root (Good for deleting tree node)' },
+      { id: 'n2', title: 'Operating Systems: Deadlock Conditions', tag: '#OS', body: 'The 4 Coffman conditions for Deadlock:\n1. Mutual Exclusion\n2. Hold and Wait\n3. No Preemption\n4. Circular Wait\n\nEliminating any one condition breaks deadlocks.' }
+    ];
+
+    const defaultAttendance = [
+      { id: 'a1', subject: 'Data Structures', attended: 14, total: 15 },
+      { id: 'a2', subject: 'Operating Systems', attended: 11, total: 14 },
+      { id: 'a3', subject: 'Linear Algebra', attended: 9, total: 14 }
+    ];
+
+    const defaultGpa = [
+      { id: 'g1', name: 'Data Structures & Algorithms', credits: 4, grade: 'A' },
+      { id: 'g2', name: 'Linear Algebra', credits: 4, grade: 'A-' },
+      { id: 'g3', name: 'Computer Architecture', credits: 3, grade: 'B+' },
+      { id: 'g4', name: 'Operating Systems', credits: 4, grade: 'A' }
+    ];
+
+    const defaultFlashcards = [
+      { id: 'f1', front: 'What is Time Complexity of QuickSort on average?', back: 'O(n log n). Worst case is O(n²) when pivot selection is unbalanced.' },
+      { id: 'f2', front: 'What are the ACID properties in databases?', back: 'Atomicity, Consistency, Isolation, and Durability.' }
+    ];
+
+    const defaultWorkouts = [
+      { id: 'w1', title: 'Тренажер залы: Арқа және кеуде жаттығулары', category: 'Тренажер залы', duration: 55, date: '10 Nov' },
+      { id: 'w2', title: 'Кампус стадионында 4 шақырым жүгіру', category: 'Жүгіру / Кардио', duration: 25, date: '08 Nov' }
+    ];
+
+    const defaultFinances = [
+      { id: 'fn1', title: 'Оқулықтар сатып алу (Algorithms)', category: 'Оқулықтар', amount: 8500, date: '08 Nov' },
+      { id: 'fn2', title: 'Студенттік асханадан түскі ас', category: 'Тамақтану', amount: 1650, date: '09 Nov' },
+      { id: 'fn3', title: 'Onay айлық жолақы картасы', category: 'Жолақы', amount: 3600, date: '01 Nov' }
+    ];
+
+    const defaultLinks = [
+      { id: 'l1', name: 'Platonus / Student Portal', url: 'https://github.com', icon: 'fa-graduation-cap' },
+      { id: 'l2', name: 'Canvas & Moodle LMS', url: 'https://moodle.org', icon: 'fa-book-open' },
+      { id: 'l3', name: 'Электронды ғылыми кітапхана', url: 'https://scholar.google.com', icon: 'fa-building-columns' }
+    ];
+
+    // State bindings
+    let classes = loadState('classes', defaultClasses);
+    let tasks = loadState('tasks', defaultTasks);
+    let exams = loadState('exams', defaultExams);
+    let notes = loadState('notes', defaultNotes);
+    let attendance = loadState('attendance', defaultAttendance);
+    let gpaCourses = loadState('gpaCourses', defaultGpa);
+    let flashcards = loadState('flashcards', defaultFlashcards);
+    let workouts = loadState('workouts', defaultWorkouts);
+    let finances = loadState('finances', defaultFinances);
+    let usefulLinks = loadState('links', defaultLinks);
+    let notifications = loadState('notifications', []);
+
+    let activeScheduleDay = 'Monday';
+    let currentTaskFilter = 'all';
+    let activeCardIndex = 0;
+    let isCardFlipped = false;
+    let activeNoteId = notes[0]?.id || null;
+
+    // Set of notified events to prevent duplicates in current session
+    let sentAlerts = new Set();
+
+    /* =========================================================================
+       3. LANGUAGE ENGINE & INSTANT TRANSLATOR
+       ========================================================================= */
+    function changeLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('tf_lang', lang);
+      document.getElementById('langSelector').value = lang;
+      applyLanguage();
+    }
+
+    function applyLanguage() {
+      const t = i18n[currentLang] || i18n.kz;
+      
+      // Sidebar labels
+      document.getElementById('navSubHeader').innerText = t.workspaceSub;
+      document.getElementById('navGroupCore').innerText = t.coreTools;
+      document.getElementById('navGroupLife').innerText = t.studentLife;
+      document.getElementById('nav-dashboard').innerText = t.dashboard;
+      document.getElementById('nav-schedule').innerText = t.schedule;
+      document.getElementById('nav-tasks').innerText = t.tasks;
+      document.getElementById('nav-pomodoro').innerText = t.pomodoro;
+      document.getElementById('nav-gpa').innerText = t.gpa;
+      document.getElementById('nav-attendance').innerText = t.attendance;
+      document.getElementById('nav-notes').innerText = t.notes;
+      document.getElementById('nav-flashcards').innerText = t.flashcards;
+      document.getElementById('nav-sports').innerText = t.sports;
+      document.getElementById('nav-finance').innerText = t.finance;
+      document.getElementById('nav-links').innerText = t.links;
+
+      // Topbar & Search
+      document.getElementById('globalSearchInput').placeholder = t.searchPlaceholder;
+      document.getElementById('headerNewTaskBtn').innerText = t.newTaskBtn;
+      document.getElementById('notifHeaderTitle').innerText = (currentLang === 'kz' ? 'Хабарламалар' : (currentLang === 'ru' ? 'Уведомления' : 'Notifications'));
+      document.getElementById('notifClearBtn').innerText = (currentLang === 'kz' ? 'Тазарту' : (currentLang === 'ru' ? 'Очистить' : 'Clear all'));
+
+      // Dashboard
+      document.getElementById('heroTag').innerHTML = `<i class="fa-solid fa-sparkles text-amber-300 text-[10px]"></i> ${t.heroTag}`;
+      document.getElementById('heroTitle').innerText = t.heroTitle;
+      document.getElementById('heroSub').innerText = t.heroSub;
+      document.getElementById('kpiLabelPending').innerText = t.kpiPending;
+      document.getElementById('kpiLabelClasses').innerText = t.kpiClasses;
+      document.getElementById('kpiLabelGpa').innerText = t.kpiGpa;
+      document.getElementById('kpiLabelPomodoro').innerText = t.kpiPomodoro;
+      document.getElementById('todayLecturesTitle').innerText = t.todayLectures;
+      document.getElementById('viewAllScheduleBtn').innerText = t.viewAll;
+      document.getElementById('priorityTasksTitle').innerText = t.priorityTasks;
+      document.getElementById('priorityTasksSub').innerText = t.prioritySub;
+      document.getElementById('manageTasksBtn').innerText = t.manageTasks;
+      document.getElementById('dashboardQuickTaskInput').placeholder = t.quickAddPlace;
+      document.getElementById('dashboardQuickAddBtn').innerText = t.addBtn;
+      document.getElementById('examsCountdownTitle').innerText = t.examsCountdown;
+      document.getElementById('manageExamsBtn').innerText = t.manageExams;
+
+      // Filter Buttons
+      document.getElementById('filterBtn-all').innerText = t.all;
+      document.getElementById('filterBtn-active').innerText = t.todo;
+      document.getElementById('filterBtn-completed').innerText = t.completed;
+      document.getElementById('filterBtn-urgent').innerText = t.urgent;
+
+      // Modal Buttons
+      document.querySelectorAll('.modalCancelBtn').forEach(b => b.innerText = t.cancel);
+      document.querySelectorAll('.modalSaveBtn').forEach(b => b.innerText = t.save);
+
+      // Notes save button
+      const noteSaveBtn = document.getElementById('noteSaveBtn');
+      if (noteSaveBtn) noteSaveBtn.innerHTML = `<i class="fa-regular fa-floppy-disk"></i> ${t.save}`;
+
+      // Refresh dynamic modules
+      renderScheduleDayPills();
+      renderScheduleTimeline();
+      renderTasks();
+      renderExamTicker();
+      updateDashboardMetrics();
+      checkScheduleAlerts();
+      renderAttendance();
+      renderNotesList();
+    }
+
+    /* =========================================================================
+       4. AUDIO CHIMES (Synthesized via Web Audio API)
+       ========================================================================= */
+    let audioMuted = false;
+    function playTone(freq1 = 587.33, freq2 = 880, dur = 0.5) {
+      if (audioMuted) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq1, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(freq2, ctx.currentTime + dur * 0.5);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + dur + 0.05);
+      } catch (e) {}
+    }
+
+    function toggleAudioSound() {
+      audioMuted = !audioMuted;
+      const btn = document.getElementById('soundToggleBtn');
+      if (!audioMuted) {
+        btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+        showToast('Аудио дыбыс қосылды / Sound ON');
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+        showToast('Аудио дыбыс өшірілді / Muted');
+      }
+    }
+
+    /* =========================================================================
+       5. TOAST NOTIFICATIONS & BELL DRAWER
+       ========================================================================= */
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'px-4 py-2.5 rounded-xl text-xs font-semibold shadow-lg text-white flex items-center gap-2 transform transition-all duration-300 translate-y-3 opacity-0 pointer-events-auto ' + 
+        (type === 'success' ? 'bg-emerald-800 border border-emerald-700' : 'bg-rose-800 border border-rose-700');
+      toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-300' : 'fa-circle-exclamation text-rose-300'}"></i> <span>${message}</span>`;
+      container.appendChild(toast);
+      
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-3', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-3');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    function pushNotification(title, desc, icon = 'fa-bell text-brand-600') {
+      const newNotif = {
+        id: Date.now().toString(),
+        title,
+        desc,
+        icon,
+        time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+      };
+      notifications.unshift(newNotif);
+      if (notifications.length > 20) notifications.pop();
+      saveState('notifications', notifications);
+      renderNotifications();
+      document.getElementById('notifBadge').classList.remove('hidden');
+    }
+
+    function renderNotifications() {
+      const list = document.getElementById('notifList');
+      if (!notifications.length) {
+        list.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs">${currentLang === 'kz' ? 'Жаңа хабарламалар жоқ' : (currentLang === 'ru' ? 'Нет новых уведомлений' : 'No new notifications')}</div>`;
+        return;
+      }
+      list.innerHTML = notifications.map(n => `
+        <div class="p-3 hover:bg-slate-50 dark:hover:bg-zinc-800/50 flex items-start gap-3">
+          <i class="fa-solid ${n.icon} mt-0.5"></i>
+          <div class="flex-1">
+            <p class="font-semibold text-slate-800 dark:text-zinc-200">${n.title}</p>
+            <p class="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight">${n.desc}</p>
+          </div>
+          <span class="text-[10px] text-slate-400 shrink-0 font-mono">${n.time}</span>
+        </div>
+      `).join('');
+    }
+
+    function toggleNotifications() {
+      document.getElementById('notifDropdown').classList.toggle('hidden');
+    }
+
+    function clearNotifs() {
+      notifications = [];
+      saveState('notifications', notifications);
+      renderNotifications();
+      document.getElementById('notifBadge').classList.add('hidden');
+      showToast(currentLang === 'kz' ? 'Хабарламалар тазартылды' : 'Уведомления очищены');
+    }
+
+    /* =========================================================================
+       6. ALMATY TIME ENGINE & SMART CLASS MONITOR
+       ========================================================================= */
+    function getAlmatyDate() {
+      // Returns current time in Asia/Almaty
+      const str = new Date().toLocaleString("en-US", { timeZone: "Asia/Almaty" });
+      return new Date(str);
+    }
+
+    function updateLiveClock() {
+      const now = getAlmatyDate();
+      const locale = currentLang === 'kz' ? 'kk-KZ' : (currentLang === 'ru' ? 'ru-RU' : 'en-US');
+      const timeStr = now.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const dateStr = now.toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' });
+      
+      const clock = document.getElementById('liveClock');
+      if (clock) clock.innerText = `${dateStr} • ${timeStr} (Almaty)`;
+      
+      const todayLabel = document.getElementById('todayDateLabel');
+      if (todayLabel) {
+        todayLabel.innerText = now.toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' });
+      }
+    }
+
+    function timeToMinutes(timeStr) {
+      if (!timeStr) return 0;
+      const [h, m] = timeStr.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function checkScheduleAlerts() {
+      const now = getAlmatyDate();
+      const currentDayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      const t = i18n[currentLang] || i18n.kz;
+
+      const todaysClasses = classes
+        .filter(c => c.day === currentDayName)
+        .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+      let activeClass = null;
+      let nextClass = null;
+      let minUpcomingDiff = Infinity;
+
+      todaysClasses.forEach(c => {
+        const startM = timeToMinutes(c.startTime);
+        const endM = timeToMinutes(c.endTime);
+
+        // Check if class is ongoing
+        if (currentMinutes >= startM && currentMinutes < endM) {
+          activeClass = c;
+          
+          // Trigger start alert once
+          const startKey = `started_${c.id}_${now.toDateString()}`;
+          if (!sentAlerts.has(startKey)) {
+            sentAlerts.add(startKey);
+            playTone(440, 880, 0.7);
+            showToast(`${t.classStartedNotif} : ${c.subject} (${c.room})`);
+            pushNotification(t.classStartedNotif, `${c.subject} • ${c.room} • ${c.startTime} - ${c.endTime}`, 'fa-chalkboard-user text-emerald-500');
+          }
+
+          // Trigger 5-minute ending alert once
+          if (endM - currentMinutes <= 5 && endM - currentMinutes > 0) {
+            const endKey = `ending5m_${c.id}_${now.toDateString()}`;
+            if (!sentAlerts.has(endKey)) {
+              sentAlerts.add(endKey);
+              playTone(880, 440, 0.6);
+              showToast(`${t.classEndingSoonNotif} : ${c.subject}`);
+              pushNotification(t.classEndingSoonNotif, `${c.subject} (${c.room}) ${t.endsIn} ${endM - currentMinutes} ${t.mins}`, 'fa-clock text-amber-500');
+            }
+          }
+        } else if (currentMinutes < startM) {
+          const diff = startM - currentMinutes;
+          if (diff < minUpcomingDiff) {
+            minUpcomingDiff = diff;
+            nextClass = c;
+          }
+        }
+      });
+
+      // Update Live Schedule Badge
+      const liveBadge = document.getElementById('badgeActiveClasses');
+      if (liveBadge) {
+        if (activeClass) liveBadge.classList.remove('hidden');
+        else liveBadge.classList.add('hidden');
+      }
+
+      // Update Smart Banner in Dashboard
+      const widget = document.getElementById('nextClassWidget');
+      if (widget) {
+        if (activeClass) {
+          const endM = timeToMinutes(activeClass.endTime);
+          const leftM = endM - currentMinutes;
+          widget.className = "p-5 rounded-2xl border transition-all duration-300 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4";
+          widget.innerHTML = `
+            <div class="flex items-center gap-3.5">
+              <div class="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-lg animate-pulse">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </div>
+              <div>
+                <span class="text-[10px] uppercase font-black tracking-wider text-emerald-700 dark:text-emerald-300 bg-emerald-200/70 dark:bg-emerald-900/80 px-2 py-0.5 rounded-md">${t.liveNow}</span>
+                <h3 class="text-base font-extrabold text-slate-900 dark:text-white mt-1">${activeClass.subject}</h3>
+                <p class="text-xs text-slate-600 dark:text-zinc-300"><i class="fa-solid fa-location-dot mr-1"></i>${activeClass.room} • ${activeClass.prof || 'Faculty'} • <span class="font-mono font-bold">${activeClass.startTime} - ${activeClass.endTime}</span></p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 self-start md:self-auto bg-white dark:bg-zinc-900 px-4 py-2 rounded-xl border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+              <i class="fa-solid fa-hourglass-half"></i> ${t.endsIn}: ${leftM} ${t.mins}
+            </div>
+          `;
+        } else if (nextClass) {
+          const diffH = Math.floor(minUpcomingDiff / 60);
+          const diffM = minUpcomingDiff % 60;
+          const timeText = diffH > 0 ? `${diffH} ${t.hours} ${diffM} ${t.mins}` : `${diffM} ${t.mins}`;
+          
+          widget.className = "p-5 rounded-2xl border transition-all duration-300 bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4";
+          widget.innerHTML = `
+            <div class="flex items-center gap-3.5">
+              <div class="w-11 h-11 rounded-2xl bg-brand-50 dark:bg-brand-950 text-brand-700 dark:text-brand-300 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-bell"></i>
+              </div>
+              <div>
+                <span class="text-[10px] uppercase font-black tracking-wider text-brand-700 dark:text-brand-400 bg-brand-100 dark:bg-brand-900/60 px-2 py-0.5 rounded-md">${t.nextClass}</span>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white mt-1">${nextClass.subject}</h3>
+                <p class="text-xs text-slate-500"><i class="fa-solid fa-location-dot mr-1"></i>${nextClass.room} • ${nextClass.prof || 'Faculty'} • <span class="font-mono font-bold">${nextClass.startTime}</span></p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 self-start md:self-auto bg-brand-50 dark:bg-brand-950/60 px-4 py-2 rounded-xl text-xs font-bold text-brand-800 dark:text-brand-300 border border-brand-200 dark:border-brand-900">
+              <i class="fa-solid fa-stopwatch"></i> ${t.startsIn}: ${timeText}
+            </div>
+          `;
+        } else {
+          widget.className = "p-5 rounded-2xl border transition-all duration-300 bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 shadow-xs flex items-center gap-3";
+          widget.innerHTML = `
+            <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-500 flex items-center justify-center">
+              <i class="fa-solid fa-champagne-glasses text-sm"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-800 dark:text-zinc-200">${t.noMoreClassesToday}</p>
+              <p class="text-[11px] text-slate-400">${now.toDateString()} • ${currentDayName}</p>
+            </div>
+          `;
+        }
+      }
+    }
+
+    // Run clock and alert monitor continuously
+    setInterval(() => {
+      updateLiveClock();
+      checkScheduleAlerts();
+    }, 10000);
+
+    /* =========================================================================
+       7. TIMETABLE & CLASS LOGIC (NEVER DELETES COMPLETED CLASSES)
+       ========================================================================= */
+    function renderScheduleDayPills() {
+      const container = document.getElementById('scheduleDayPills');
+      const t = i18n[currentLang] || i18n.kz;
+      container.innerHTML = dayKeys.map((day, idx) => {
+        const localizedName = t.days[idx];
+        const isActive = day === activeScheduleDay;
+        return `
+          <button onclick="setScheduleDay('${day}')" class="day-pill px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+            isActive ? 'bg-brand-700 text-white shadow-xs' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-800'
+          }">${localizedName}</button>
+        `;
+      }).join('');
+    }
+
+    function setScheduleDay(day) {
+      activeScheduleDay = day;
+      renderScheduleDayPills();
+      renderScheduleTimeline();
+    }
+
+    function renderScheduleTimeline() {
+      const container = document.getElementById('scheduleTimeline');
+      const t = i18n[currentLang] || i18n.kz;
+      const now = getAlmatyDate();
+      const currentDayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+      const filtered = classes
+        .filter(c => c.day === activeScheduleDay)
+        .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+      if (!filtered.length) {
+        container.innerHTML = `
+          <div class="p-8 text-center rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 space-y-2">
+            <i class="fa-solid fa-mug-hot text-3xl text-brand-600"></i>
+            <p class="font-semibold text-sm">${activeScheduleDay}: ${currentLang === 'kz' ? 'Сабақ жоқ' : (currentLang === 'ru' ? 'Нет занятий' : 'No classes scheduled')}</p>
+            <p class="text-xs text-slate-400">${currentLang === 'kz' ? 'Бұл күнді конспект оқуға немесе демалысқа пайдаланыңыз.' : 'Use this day for gym, study notes, or rest.'}</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(c => {
+        const startM = timeToMinutes(c.startTime);
+        const endM = timeToMinutes(c.endTime);
+        const isToday = activeScheduleDay === currentDayName;
+        
+        const isOngoing = isToday && currentMinutes >= startM && currentMinutes < endM;
+        const isDone = isToday && currentMinutes >= endM;
+
+        let statusBadge = '';
+        let cardBorder = 'border-slate-200 dark:border-zinc-800';
+
+        if (isOngoing) {
+          cardBorder = 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/30 dark:bg-emerald-950/20';
+          statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold text-[10px] animate-pulse"><i class="fa-solid fa-circle text-[8px] mr-1 text-emerald-500"></i>${t.liveNow}</span>`;
+        } else if (isDone) {
+          statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-500 dark:bg-zinc-800 dark:text-zinc-400 font-bold text-[10px]"><i class="fa-solid fa-check mr-1"></i>${t.completed}</span>`;
+        }
+
+        return `
+          <div class="p-4 rounded-2xl bg-white dark:bg-zinc-900 border ${cardBorder} shadow-xs flex items-center justify-between transition-all">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl ${isOngoing ? 'bg-emerald-600 text-white' : 'bg-brand-50 dark:bg-brand-950/70 border border-brand-200 dark:border-brand-900 text-brand-800 dark:text-brand-300'} flex flex-col items-center justify-center">
+                <i class="fa-solid fa-chalkboard-user text-sm"></i>
+                <span class="text-[9px] font-bold uppercase mt-0.5">Class</span>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-sm text-slate-900 dark:text-white ${isDone ? 'opacity-80' : ''}">${c.subject}</h3>
+                  ${statusBadge}
+                </div>
+                <p class="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
+                  <i class="fa-solid fa-location-dot text-[10px] mr-1 text-slate-400"></i>${c.room || 'TBD'} • 
+                  <i class="fa-solid fa-user-tie text-[10px] mx-1 text-slate-400"></i>${c.prof || 'Faculty Staff'}
+                </p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="font-mono text-xs font-semibold px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">${c.startTime} - ${c.endTime}</span>
+              <button onclick="deleteClass('${c.id}')" class="text-slate-400 hover:text-rose-500 p-2"><i class="fa-regular fa-trash-can"></i></button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleSaveClass(e) {
+      e.preventDefault();
+      const subject = document.getElementById('classSubject').value.trim();
+      const day = document.getElementById('classDay').value;
+      const startTime = document.getElementById('classStartTime').value;
+      const endTime = document.getElementById('classEndTime').value;
+      const room = document.getElementById('classRoom').value.trim();
+      const prof = document.getElementById('classProf').value.trim();
+
+      classes.push({ id: Date.now().toString(), subject, day, startTime, endTime, room, prof });
+      saveState('classes', classes);
+      closeModal('modalClass');
+      e.target.reset();
+      renderScheduleTimeline();
+      updateDashboardMetrics();
+      checkScheduleAlerts();
+      showToast(currentLang === 'kz' ? 'Сабақ кестеге қосылды' : 'Занятие добавлено в расписание');
+    }
+
+    function deleteClass(id) {
+      classes = classes.filter(c => c.id !== id);
+      saveState('classes', classes);
+      renderScheduleTimeline();
+      updateDashboardMetrics();
+      checkScheduleAlerts();
+      showToast(currentLang === 'kz' ? 'Сабақ өшірілді' : 'Занятие удалено');
+    }
+
+    /* =========================================================================
+       8. DASHBOARD METRICS & TODAY LIST
+       ========================================================================= */
+    function updateDashboardMetrics() {
+      const pendingCount = tasks.filter(t => !t.completed).length;
+      document.getElementById('kpiPendingTasks').innerText = pendingCount;
+      document.getElementById('badgePendingTasks').innerText = pendingCount;
+
+      const now = getAlmatyDate();
+      const currentDayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+      const todaysClasses = classes
+        .filter(c => c.day === currentDayName)
+        .sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+      document.getElementById('kpiTodayClasses').innerText = todaysClasses.length;
+
+      // Render today's lecture preview
+      const previewEl = document.getElementById('todaySchedulePreviewList');
+      const t = i18n[currentLang] || i18n.kz;
+
+      if (!todaysClasses.length) {
+        previewEl.innerHTML = `<div class="p-4 text-center rounded-xl bg-slate-50 dark:bg-zinc-800/40 text-xs text-slate-400">${t.noMoreClassesToday}</div>`;
+      } else {
+        previewEl.innerHTML = todaysClasses.map(c => {
+          const startM = timeToMinutes(c.startTime);
+          const endM = timeToMinutes(c.endTime);
+          const isOngoing = currentMinutes >= startM && currentMinutes < endM;
+          const isDone = currentMinutes >= endM;
+
+          return `
+            <div class="p-3 rounded-xl border flex items-center justify-between ${
+              isOngoing ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-400' : 'bg-slate-50 dark:bg-zinc-800/40 border-slate-100 dark:border-zinc-800'
+            }">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <p class="font-bold text-xs text-slate-900 dark:text-white ${isDone ? 'line-through text-slate-400' : ''}">${c.subject}</p>
+                  ${isOngoing ? `<span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-600 text-white font-bold animate-pulse">${t.liveNow}</span>` : ''}
+                  ${isDone ? `<i class="fa-solid fa-circle-check text-emerald-600 text-xs"></i>` : ''}
+                </div>
+                <p class="text-[11px] text-slate-500">${c.room} • ${c.prof || 'Faculty'}</p>
+              </div>
+              <span class="text-[11px] font-mono px-2 py-1 rounded-md bg-brand-100 dark:bg-brand-900/40 text-brand-800 dark:text-brand-300 font-semibold">${c.startTime} - ${c.endTime}</span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render Dashboard Task Checklist
+      const dashTasks = document.getElementById('dashboardTaskList');
+      const topTasks = tasks.slice(0, 4);
+      if (!topTasks.length) {
+        dashTasks.innerHTML = `<div class="text-xs text-slate-400 py-3">${currentLang === 'kz' ? 'Тапсырмалар жоқ! Жоғарыдан қосыңыз.' : 'All clear! Add a task above.'}</div>`;
+      } else {
+        dashTasks.innerHTML = topTasks.map(tItem => `
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800">
+            <div class="flex items-center gap-3">
+              <input type="checkbox" onchange="toggleTaskStatus('${tItem.id}')" ${tItem.completed ? 'checked' : ''} class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
+              <span class="text-xs ${tItem.completed ? 'line-through text-slate-400 dark:text-zinc-500' : 'font-medium text-slate-800 dark:text-zinc-200'}">${tItem.title}</span>
+            </div>
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold ${
+              tItem.priority === 'Urgent' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300' : 'bg-slate-200 dark:bg-zinc-700 text-slate-700 dark:text-zinc-300'
+            }">${tItem.priority}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    function handleQuickTaskAdd(e) {
+      e.preventDefault();
+      const input = document.getElementById('dashboardQuickTaskInput');
+      if (!input.value.trim()) return;
+
+      tasks.unshift({
+        id: Date.now().toString(),
+        title: input.value.trim(),
+        priority: 'Important',
+        category: 'Study',
+        dueDate: new Date().toISOString().split('T')[0],
+        completed: false
+      });
+      saveState('tasks', tasks);
+      input.value = '';
+      updateDashboardMetrics();
+      renderTasks();
+      showToast(currentLang === 'kz' ? 'Тапсырма қосылды' : 'Задача добавлена');
+    }
+
+    /* =========================================================================
+       9. STUDY NOTES & DOCUMENTS (COMPLETE SAVE & EDIT ENGINE)
+       ========================================================================= */
+    function renderNotesList() {
+      const list = document.getElementById('notesItemList');
+      if (!notes.length) {
+        list.innerHTML = `<div class="p-3 text-center text-xs text-slate-400">${currentLang === 'kz' ? 'Конспекттер жоқ' : 'Нет заметок'}</div>`;
+        return;
+      }
+
+      list.innerHTML = notes.map(n => `
+        <div onclick="selectNote('${n.id}')" class="p-3 rounded-xl cursor-pointer transition-all border ${
+          n.id === activeNoteId ? 'bg-brand-50/90 dark:bg-brand-950/50 border-brand-500 ring-1 ring-brand-500/30' : 'bg-slate-50 dark:bg-zinc-800/40 border-transparent hover:bg-slate-100 dark:hover:bg-zinc-800'
+        }">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-xs text-slate-800 dark:text-zinc-200 line-clamp-1">${n.title || 'Атаусыз конспект'}</h4>
+            <button onclick="event.stopPropagation(); deleteNote('${n.id}')" class="text-slate-400 hover:text-rose-500 text-xs ml-1"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1 line-clamp-2">${n.body}</p>
+        </div>
+      `).join('');
+    }
+
+    function selectNote(id) {
+      activeNoteId = id;
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        document.getElementById('noteTitleInput').value = note.title;
+        document.getElementById('noteTagInput').value = note.tag || '';
+        document.getElementById('noteBodyInput').value = note.body;
+      }
+      renderNotesList();
+    }
+
+    function createNewNote() {
+      const newNote = {
+        id: Date.now().toString(),
+        title: currentLang === 'kz' ? 'Жаңа дәріс жазбасы' : (currentLang === 'ru' ? 'Новая лекция' : 'New Lecture Note'),
+        tag: '#Дәріс',
+        body: 'Конспект мазмұны осында...'
+      };
+      notes.unshift(newNote);
+      saveState('notes', notes);
+      selectNote(newNote.id);
+      showToast(currentLang === 'kz' ? 'Жаңа конспект жасалды' : 'Создана новая заметка');
+    }
+
+    function saveActiveNote() {
+      if (!activeNoteId) return;
+      const title = document.getElementById('noteTitleInput').value.trim();
+      const tag = document.getElementById('noteTagInput').value.trim();
+      const body = document.getElementById('noteBodyInput').value;
+
+      notes = notes.map(n => n.id === activeNoteId ? { ...n, title, tag, body } : n);
+      saveState('notes', notes);
+      renderNotesList();
+      showToast(currentLang === 'kz' ? 'Конспект сәтті сақталды!' : 'Заметка успешно сохранена!');
+    }
+
+    function deleteNote(id) {
+      notes = notes.filter(n => n.id !== id);
+      saveState('notes', notes);
+      if (activeNoteId === id) {
+        activeNoteId = notes[0]?.id || null;
+      }
+      selectNote(activeNoteId);
+      renderNotesList();
+      showToast(currentLang === 'kz' ? 'Конспект өшірілді' : 'Заметка удалена');
+    }
+
+    function filterNotes(q) {
+      const query = q.toLowerCase();
+      const items = document.querySelectorAll('#notesItemList > div');
+      notes.forEach((n, idx) => {
+        const matches = n.title.toLowerCase().includes(query) || n.body.toLowerCase().includes(query);
+        if (items[idx]) items[idx].style.display = matches ? 'block' : 'none';
+      });
+    }
+
+    /* =========================================================================
+       10. TASK & EXAM MANAGER
+       ========================================================================= */
+    function setTaskFilter(filter) {
+      currentTaskFilter = filter;
+      ['all', 'active', 'completed', 'urgent'].forEach(f => {
+        const btn = document.getElementById(`filterBtn-${f}`);
+        if (f === filter) {
+          btn.className = 'px-3 py-1 rounded-lg font-semibold bg-white dark:bg-zinc-700 text-slate-800 dark:text-white shadow-xs';
+        } else {
+          btn.className = 'px-3 py-1 rounded-lg font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900';
+        }
+      });
+      renderTasks();
+    }
+
+    function renderTasks() {
+      const container = document.getElementById('fullTaskList');
+      let filtered = tasks;
+
+      if (currentTaskFilter === 'active') filtered = tasks.filter(t => !t.completed);
+      else if (currentTaskFilter === 'completed') filtered = tasks.filter(t => t.completed);
+      else if (currentTaskFilter === 'urgent') filtered = tasks.filter(t => t.priority === 'Urgent');
+
+      if (!filtered.length) {
+        container.innerHTML = `<div class="p-8 text-center text-xs text-slate-400 bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800">${currentLang === 'kz' ? 'Бұл санатта тапсырма жоқ' : 'Нет задач'}</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(t => `
+        <div class="p-3.5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-xs flex items-center justify-between gap-3 group transition-all">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <input type="checkbox" onchange="toggleTaskStatus('${t.id}')" ${t.completed ? 'checked' : ''} class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500 cursor-pointer">
+            <div class="min-w-0 flex-1">
+              <p class="text-xs font-semibold ${t.completed ? 'line-through text-slate-400 dark:text-zinc-500' : 'text-slate-800 dark:text-zinc-200'} truncate">${t.title}</p>
+              <div class="flex items-center gap-2 mt-1 text-[10px] text-slate-400">
+                <span><i class="fa-solid fa-tag text-[9px] mr-1"></i>${t.category}</span>
+                ${t.dueDate ? `<span>• Мерзімі: ${t.dueDate}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${
+              t.priority === 'Urgent' ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300' :
+              (t.priority === 'Important' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300' : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400')
+            }">${t.priority}</span>
+            <button onclick="deleteTask('${t.id}')" class="text-slate-400 hover:text-rose-500 p-1"><i class="fa-regular fa-trash-can text-xs"></i></button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function handleAddTask(e) {
+      e.preventDefault();
+      const input = document.getElementById('taskInput');
+      const priority = document.getElementById('taskPriority').value;
+      const category = document.getElementById('taskCategory').value;
+      const dueDate = document.getElementById('taskDueDate').value;
+
+      tasks.unshift({
+        id: Date.now().toString(),
+        title: input.value.trim(),
+        priority,
+        category,
+        dueDate,
+        completed: false
+      });
+      saveState('tasks', tasks);
+      input.value = '';
+      renderTasks();
+      updateDashboardMetrics();
+      showToast(currentLang === 'kz' ? 'Тапсырма қосылды' : 'Задача добавлена');
+    }
+
+    function toggleTaskStatus(id) {
+      tasks = tasks.map(t => {
+        if (t.id === id) {
+          const nextState = !t.completed;
+          if (nextState) playTone(523.25, 659.25, 0.4);
+          return { ...t, completed: nextState };
+        }
+        return t;
+      });
+      saveState('tasks', tasks);
+      renderTasks();
+      updateDashboardMetrics();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(t => t.id !== id);
+      saveState('tasks', tasks);
+      renderTasks();
+      updateDashboardMetrics();
+      showToast(currentLang === 'kz' ? 'Тапсырма өшірілді' : 'Задача удалена');
+    }
+
+    function renderExamTicker() {
+      const grid = document.getElementById('examCountdownGrid');
+      const fullExamList = document.getElementById('fullExamList');
+      if (!exams.length) {
+        const emptyMsg = `<div class="col-span-3 text-xs text-slate-400">${currentLang === 'kz' ? 'Тіркелген емтихан жоқ.' : 'No registered exams.'}</div>`;
+        grid.innerHTML = emptyMsg;
+        if (fullExamList) fullExamList.innerHTML = emptyMsg;
+        return;
+      }
+
+      const html = exams.map(e => {
+        const examDate = new Date(e.date);
+        const today = new Date();
+        const diffDays = Math.ceil((examDate - today) / (1000 * 60 * 60 * 24));
+        const isClose = diffDays <= 5 && diffDays >= 0;
+
+        return `
+          <div class="p-4 rounded-xl border ${isClose ? 'border-amber-400 bg-amber-50/50 dark:bg-amber-950/20' : 'border-slate-200 dark:border-zinc-800 bg-slate-50/40 dark:bg-zinc-800/40'} flex flex-col justify-between space-y-2">
+            <div class="flex items-start justify-between">
+              <h4 class="font-bold text-xs text-slate-900 dark:text-white line-clamp-1">${e.title}</h4>
+              <button onclick="deleteExam('${e.id}')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-xmark text-xs"></i></button>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500 text-[11px]"><i class="fa-regular fa-calendar mr-1"></i>${e.date} (${e.room || 'Hall'})</span>
+              <span class="font-bold text-xs ${diffDays < 0 ? 'text-slate-400' : (isClose ? 'text-amber-600' : 'text-brand-600')}">
+                ${diffDays < 0 ? (currentLang === 'kz' ? 'Аяқталды' : 'Concluded') : `${diffDays} ${currentLang === 'kz' ? 'күн қалды' : 'дней'}`}
+              </span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      grid.innerHTML = html;
+      if (fullExamList) fullExamList.innerHTML = html;
+    }
+
+    function handleSaveExam(e) {
+      e.preventDefault();
+      const title = document.getElementById('examTitle').value.trim();
+      const date = document.getElementById('examDate').value;
+      const room = document.getElementById('examRoom').value.trim();
+
+      exams.push({ id: Date.now().toString(), title, date, room });
+      saveState('exams', exams);
+      closeModal('modalExam');
+      e.target.reset();
+      renderExamTicker();
+      showToast(currentLang === 'kz' ? 'Емтихан тіркелді' : 'Экзамен добавлен');
+    }
+
+    function deleteExam(id) {
+      exams = exams.filter(e => e.id !== id);
+      saveState('exams', exams);
+      renderExamTicker();
+      showToast(currentLang === 'kz' ? 'Емтихан өшірілді' : 'Экзамен удален');
+    }
+
+    /* =========================================================================
+       11. POMODORO TIMER
+       ========================================================================= */
+    let timerMode = 'pomodoro';
+    let timerDuration = 25 * 60;
+    let timerRemaining = 25 * 60;
+    let timerInterval = null;
+    let pomoSessions = loadState('pomoSessions', 0);
+
+    function setPomodoroMode(mode) {
+      timerMode = mode;
+      pauseTimer();
+      const t = i18n[currentLang] || i18n.kz;
+
+      ['pomodoro', 'short', 'long'].forEach(m => {
+        const btn = document.getElementById(`pomoBtn-${m}`);
+        if (m === mode) {
+          btn.className = 'px-5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-zinc-700 text-brand-700 dark:text-brand-400 shadow-sm transition-all';
+        } else {
+          btn.className = 'px-5 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-zinc-400 hover:text-slate-900 transition-all';
+        }
+      });
+
+      if (mode === 'pomodoro') {
+        timerDuration = 25 * 60;
+        document.getElementById('timerStatusLabel').innerText = t.focusTime;
+      } else if (mode === 'short') {
+        timerDuration = 5 * 60;
+        document.getElementById('timerStatusLabel').innerText = t.shortBreak;
+      } else {
+        timerDuration = 15 * 60;
+        document.getElementById('timerStatusLabel').innerText = t.longBreak;
+      }
+      timerRemaining = timerDuration;
+      updateTimerUI();
+    }
+
+    function updateTimerUI() {
+      const minutes = Math.floor(timerRemaining / 60);
+      const seconds = timerRemaining % 60;
+      document.getElementById('timerDisplay').innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+      const progressCircle = document.getElementById('pomoCircleProgress');
+      const circumference = 2 * Math.PI * 42;
+      const offset = circumference * (1 - (timerRemaining / timerDuration));
+      progressCircle.style.strokeDashoffset = offset;
+    }
+
+    function toggleTimer() {
+      if (timerInterval) pauseTimer();
+      else startTimer();
+    }
+
+    function startTimer() {
+      const btn = document.getElementById('timerStartBtn');
+      const t = i18n[currentLang] || i18n.kz;
+      btn.innerHTML = `<i class="fa-solid fa-pause mr-2"></i> ${t.pause}`;
+      btn.className = 'px-8 py-3 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm shadow-lg shadow-amber-600/30 transition-all';
+
+      timerInterval = setInterval(() => {
+        if (timerRemaining > 0) {
+          timerRemaining--;
+          updateTimerUI();
+        } else {
+          pauseTimer();
+          playTone(523, 1046, 1.0);
+          if (timerMode === 'pomodoro') {
+            pomoSessions++;
+            saveState('pomoSessions', pomoSessions);
+            updatePomoStats();
+            showToast('Зейін циклі аяқталды! Демалыңыз.');
+            setPomodoroMode('short');
+          } else {
+            showToast('Демалыс бітті! Жаңа циклге дайынсыз ба?');
+            setPomodoroMode('pomodoro');
+          }
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      const btn = document.getElementById('timerStartBtn');
+      const t = i18n[currentLang] || i18n.kz;
+      if (btn) {
+        btn.innerHTML = `<i class="fa-solid fa-play mr-2"></i> ${t.start}`;
+        btn.className = 'px-8 py-3 rounded-2xl bg-brand-700 hover:bg-brand-800 text-white font-bold text-sm shadow-lg shadow-brand-700/30 transition-all';
+      }
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      timerRemaining = timerDuration;
+      updateTimerUI();
+    }
+
+    function updatePomoStats() {
+      document.getElementById('pomoSessionsCount').innerText = pomoSessions;
+      document.getElementById('pomoMinutesCount').innerText = `${pomoSessions * 25} мин`;
+      document.getElementById('kpiPomodoros').innerText = pomoSessions;
+    }
+
+    /* =========================================================================
+       12. GPA CALCULATOR
+       ========================================================================= */
+    const gradePoints = { 'A': 4.0, 'A-': 3.67, 'B+': 3.33, 'B': 3.0, 'B-': 2.67, 'C+': 2.33, 'C': 2.0, 'D': 1.0, 'F': 0.0 };
+
+    function renderGpaCourses() {
+      const tbody = document.getElementById('gpaCourseRows');
+      tbody.innerHTML = gpaCourses.map(c => `
+        <tr class="hover:bg-slate-50/50 dark:hover:bg-zinc-800/40">
+          <td class="py-2.5">
+            <input type="text" value="${c.name}" onchange="updateGpaCourse('${c.id}', 'name', this.value)" class="w-full bg-transparent font-medium text-slate-800 dark:text-zinc-200 focus:outline-none">
+          </td>
+          <td class="py-2.5">
+            <input type="number" min="1" max="12" value="${c.credits}" onchange="updateGpaCourse('${c.id}', 'credits', parseFloat(this.value))" class="w-16 px-2 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 focus:outline-none">
+          </td>
+          <td class="py-2.5">
+            <select onchange="updateGpaCourse('${c.id}', 'grade', this.value)" class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 font-bold text-slate-700 dark:text-zinc-200 focus:outline-none">
+              ${Object.keys(gradePoints).map(g => `<option value="${g}" ${g === c.grade ? 'selected' : ''}>${g} (${gradePoints[g]})</option>`).join('')}
+            </select>
+          </td>
+          <td class="py-2.5 text-center">
+            <button onclick="removeGpaCourse('${c.id}')" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash-can"></i></button>
+          </td>
+        </tr>
+      `).join('');
+      recalculateGpa();
+    }
+
+    function addGpaCourseRow() {
+      gpaCourses.push({ id: Date.now().toString(), name: 'Жаңа таңдау пәні', credits: 3, grade: 'A' });
+      saveState('gpaCourses', gpaCourses);
+      renderGpaCourses();
+    }
+
+    function updateGpaCourse(id, field, val) {
+      gpaCourses = gpaCourses.map(c => c.id === id ? { ...c, [field]: val } : c);
+      saveState('gpaCourses', gpaCourses);
+      recalculateGpa();
+    }
+
+    function removeGpaCourse(id) {
+      gpaCourses = gpaCourses.filter(c => c.id !== id);
+      saveState('gpaCourses', gpaCourses);
+      renderGpaCourses();
+    }
+
+    function recalculateGpa() {
+      let totalPts = 0;
+      let totalCreds = 0;
+
+      gpaCourses.forEach(c => {
+        const cred = Number(c.credits) || 0;
+        const pt = gradePoints[c.grade] ?? 0;
+        totalPts += cred * pt;
+        totalCreds += cred;
+      });
+
+      const gpa = totalCreds > 0 ? (totalPts / totalCreds).toFixed(2) : '0.00';
+      document.getElementById('calculatedGpaDisplay').innerText = gpa;
+      document.getElementById('totalCreditsDisplay').innerText = `${totalCreds} ECTS`;
+      document.getElementById('kpiGpa').innerText = gpa;
+    }
+
+    /* =========================================================================
+       13. ATTENDANCE TRACKER
+       ========================================================================= */
+    function renderAttendance() {
+      const grid = document.getElementById('attendanceGrid');
+      const t = i18n[currentLang] || i18n.kz;
+
+      if (!attendance.length) {
+        grid.innerHTML = `<div class="col-span-3 text-xs text-slate-400">${currentLang === 'kz' ? 'Пәндер тіркелмеген.' : 'No courses registered.'}</div>`;
+        return;
+      }
+
+      grid.innerHTML = attendance.map(a => {
+        const pct = Math.round((a.attended / a.total) * 100) || 0;
+        const isLow = pct < 80;
+
+        return `
+          <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border ${isLow ? 'border-rose-400 dark:border-rose-900' : 'border-slate-200 dark:border-zinc-800'} shadow-xs space-y-4">
+            <div class="flex items-start justify-between">
+              <div>
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white">${a.subject}</h3>
+                <p class="text-xs text-slate-400 mt-0.5">${a.attended} / ${a.total} ${currentLang === 'kz' ? 'сабаққа қатысты' : 'посещено'}</p>
+              </div>
+              <span class="text-xs font-bold px-2.5 py-1 rounded-xl ${isLow ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'}">
+                ${pct}%
+              </span>
+            </div>
+
+            <div class="w-full bg-slate-100 dark:bg-zinc-800 h-2.5 rounded-full overflow-hidden">
+              <div class="h-full rounded-full ${isLow ? 'bg-rose-500' : 'bg-brand-600'}" style="width: ${Math.min(pct, 100)}%"></div>
+            </div>
+
+            ${isLow ? `<p class="text-[11px] text-rose-600 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> ${t.belowAttReq}</p>` : ''}
+
+            <div class="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-zinc-800">
+              <div class="flex gap-1.5">
+                <button onclick="stepAttendance('${a.id}', 1, 1)" class="px-3 py-1 rounded-lg bg-brand-50 hover:bg-brand-100 dark:bg-brand-950 dark:hover:bg-brand-900 text-brand-700 dark:text-brand-300 text-xs font-semibold">${t.attendedBtn}</button>
+                <button onclick="stepAttendance('${a.id}', 0, 1)" class="px-3 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950 dark:hover:bg-rose-900 text-rose-700 dark:text-rose-300 text-xs font-semibold">${t.missedBtn}</button>
+              </div>
+              <button onclick="deleteAttendance('${a.id}')" class="text-slate-400 hover:text-rose-500 p-1"><i class="fa-regular fa-trash-can text-xs"></i></button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function stepAttendance(id, pInc, tInc) {
+      attendance = attendance.map(a => a.id === id ? { ...a, attended: a.attended + pInc, total: a.total + tInc } : a);
+      saveState('attendance', attendance);
+      renderAttendance();
+    }
+
+    function handleSaveAttendance(e) {
+      e.preventDefault();
+      const subject = document.getElementById('attSubject').value.trim();
+      const attended = parseInt(document.getElementById('attPresent').value) || 0;
+      const total = parseInt(document.getElementById('attTotal').value) || 1;
+
+      attendance.push({ id: Date.now().toString(), subject, attended, total });
+      saveState('attendance', attendance);
+      closeModal('modalAttendance');
+      e.target.reset();
+      renderAttendance();
+      showToast(currentLang === 'kz' ? 'Қатысу журналы жаңартылды' : 'Журнал обновлен');
+    }
+
+    function deleteAttendance(id) {
+      attendance = attendance.filter(a => a.id !== id);
+      saveState('attendance', attendance);
+      renderAttendance();
+    }
+
+    /* =========================================================================
+       14. FLASHCARDS, SPORTS, FINANCE & LINKS
+       ========================================================================= */
+    function updateFlashcardUI() {
+      if (!flashcards.length) {
+        document.getElementById('cardFrontText').innerText = currentLang === 'kz' ? 'Флэшкарталар жоқ' : 'No flashcards';
+        document.getElementById('cardBackText').innerText = '';
+        return;
+      }
+      if (activeCardIndex >= flashcards.length) activeCardIndex = 0;
+      if (activeCardIndex < 0) activeCardIndex = flashcards.length - 1;
+
+      const card = flashcards[activeCardIndex];
+      document.getElementById('cardFrontText').innerText = card.front;
+      document.getElementById('cardBackText').innerText = card.back;
+      document.getElementById('cardCounter').innerText = `${currentLang === 'kz' ? 'Карта' : 'Card'} ${activeCardIndex + 1} / ${flashcards.length}`;
+      isCardFlipped = false;
+      document.getElementById('flashcardInner').classList.remove('rotate-y-180');
+    }
+
+    function flipActiveCard() {
+      isCardFlipped = !isCardFlipped;
+      document.getElementById('flashcardInner').classList.toggle('rotate-y-180', isCardFlipped);
+    }
+    function nextFlashcard() { activeCardIndex = (activeCardIndex + 1) % flashcards.length; updateFlashcardUI(); }
+    function prevFlashcard() { activeCardIndex = (activeCardIndex - 1 + flashcards.length) % flashcards.length; updateFlashcardUI(); }
+
+    function handleSaveFlashcard(e) {
+      e.preventDefault();
+      const front = document.getElementById('fcFront').value.trim();
+      const back = document.getElementById('fcBack').value.trim();
+      flashcards.push({ id: Date.now().toString(), front, back });
+      saveState('flashcards', flashcards);
+      closeModal('modalFlashcard');
+      e.target.reset();
+      activeCardIndex = flashcards.length - 1;
+      updateFlashcardUI();
+      showToast(currentLang === 'kz' ? 'Флэшкарта сақталды' : 'Карточка сохранена');
+    }
+
+    function renderWorkouts() {
+      const list = document.getElementById('workoutLogList');
+      if (!workouts.length) {
+        list.innerHTML = `<div class="text-xs text-slate-400 py-3">${currentLang === 'kz' ? 'Жаттығулар тіркелмеген' : 'No workouts logged'}</div>`;
+        return;
+      }
+      list.innerHTML = workouts.map(w => `
+        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-100 dark:border-zinc-800 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 flex items-center justify-center">
+              <i class="fa-solid fa-person-running"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-xs text-slate-800 dark:text-white">${w.title}</h4>
+              <p class="text-[11px] text-slate-400">${w.category} • ${w.duration} мин • ${w.date}</p>
+            </div>
+          </div>
+          <button onclick="deleteWorkout('${w.id}')" class="text-slate-400 hover:text-rose-500 p-2"><i class="fa-regular fa-trash-can text-xs"></i></button>
+        </div>
+      `).join('');
+    }
+
+    function handleSaveWorkout(e) {
+      e.preventDefault();
+      const title = document.getElementById('woTitle').value.trim();
+      const category = document.getElementById('woCategory').value;
+      const duration = document.getElementById('woDuration').value;
+
+      workouts.unshift({ id: Date.now().toString(), title, category, duration, date: '10 Nov' });
+      saveState('workouts', workouts);
+      closeModal('modalWorkout');
+      e.target.reset();
+      renderWorkouts();
+      showToast(currentLang === 'kz' ? 'Жаттығу жазылды' : 'Тренировка добавлена');
+    }
+
+    function deleteWorkout(id) {
+      workouts = workouts.filter(w => w.id !== id);
+      saveState('workouts', workouts);
+      renderWorkouts();
+    }
+
+    function renderFinance() {
+      const tbody = document.getElementById('financeTableBody');
+      const totalBudget = 150000;
+      let totalSpent = 0;
+      finances.forEach(f => totalSpent += Number(f.amount) || 0);
+      const remaining = totalBudget - totalSpent;
+
+      document.getElementById('financeTotalSpent').innerText = `${totalSpent.toLocaleString()} ₸`;
+      document.getElementById('financeRemaining').innerText = `${remaining.toLocaleString()} ₸`;
+
+      if (!finances.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">Шығындар тіркелмеген</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = finances.map(f => `
+        <tr class="hover:bg-slate-50/50 dark:hover:bg-zinc-800/40">
+          <td class="py-2.5 font-medium text-slate-800 dark:text-zinc-200">${f.title}</td>
+          <td class="py-2.5"><span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 text-[10px] font-semibold">${f.category}</span></td>
+          <td class="py-2.5 text-slate-400">${f.date}</td>
+          <td class="py-2.5 text-right font-bold text-rose-600">-${Number(f.amount).toLocaleString()} ₸</td>
+          <td class="py-2.5 text-center"><button onclick="deleteFinance('${f.id}')" class="text-slate-400 hover:text-rose-500"><i class="fa-regular fa-trash-can text-xs"></i></button></td>
+        </tr>
+      `).join('');
+    }
+
+    function handleSaveFinance(e) {
+      e.preventDefault();
+      const title = document.getElementById('finTitle').value.trim();
+      const amount = parseFloat(document.getElementById('finAmount').value) || 0;
+      const category = document.getElementById('finCategory').value;
+
+      finances.unshift({ id: Date.now().toString(), title, amount, category, date: '10 Nov' });
+      saveState('finances', finances);
+      closeModal('modalFinance');
+      e.target.reset();
+      renderFinance();
+      showToast(currentLang === 'kz' ? 'Шығын қосылды' : 'Расход сохранен');
+    }
+
+    function deleteFinance(id) {
+      finances = finances.filter(f => f.id !== id);
+      saveState('finances', finances);
+      renderFinance();
+    }
+
+    function renderLinks() {
+      const grid = document.getElementById('linksGrid');
+      grid.innerHTML = usefulLinks.map(l => `
+        <div class="p-5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 shadow-xs flex items-center justify-between hover:border-brand-500 transition-all group">
+          <a href="${l.url}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3.5 flex-1 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-950/70 border border-brand-200 dark:border-brand-900 flex items-center justify-center text-brand-700 dark:text-brand-400 shrink-0">
+              <i class="fa-solid ${l.icon || 'fa-link'} text-sm"></i>
+            </div>
+            <div class="min-w-0">
+              <h4 class="font-bold text-xs text-slate-800 dark:text-white truncate group-hover:text-brand-600">${l.name}</h4>
+              <p class="text-[11px] text-slate-400 truncate mt-0.5">${l.url}</p>
+            </div>
+          </a>
+          <button onclick="deleteLink('${l.id}')" class="text-slate-300 hover:text-rose-500 p-2"><i class="fa-regular fa-trash-can text-xs"></i></button>
+        </div>
+      `).join('');
+    }
+
+    function handleSaveLink(e) {
+      e.preventDefault();
+      const name = document.getElementById('linkName').value.trim();
+      const url = document.getElementById('linkUrl').value.trim();
+
+      usefulLinks.push({ id: Date.now().toString(), name, url, icon: 'fa-globe' });
+      saveState('links', usefulLinks);
+      closeModal('modalLink');
+      e.target.reset();
+      renderLinks();
+      showToast(currentLang === 'kz' ? 'Сілтеме қосылды' : 'Ссылка добавлена');
+    }
+
+    function deleteLink(id) {
+      usefulLinks = usefulLinks.filter(l => l.id !== id);
+      saveState('links', usefulLinks);
+      renderLinks();
+    }
+
+    /* =========================================================================
+       15. GLOBAL SEARCH & MODALS & TABS
+       ========================================================================= */
+    function handleGlobalSearch(query) {
+      const dd = document.getElementById('searchDropdown');
+      if (!query.trim()) { dd.classList.add('hidden'); return; }
+      const q = query.toLowerCase();
+
+      const taskMatches = tasks.filter(t => t.title.toLowerCase().includes(q));
+      const noteMatches = notes.filter(n => n.title.toLowerCase().includes(q) || n.body.toLowerCase().includes(q));
+      const classMatches = classes.filter(c => c.subject.toLowerCase().includes(q) || c.room.toLowerCase().includes(q));
+
+      let html = '';
+      if (!taskMatches.length && !noteMatches.length && !classMatches.length) {
+        html = '<div class="p-3 text-center text-xs text-slate-400">Нәтиже табылмады / Not found</div>';
+      } else {
+        if (taskMatches.length) {
+          html += '<div class="px-3 py-1 bg-slate-50 dark:bg-zinc-800 text-[10px] font-bold uppercase text-slate-400">Тапсырмалар</div>';
+          taskMatches.forEach(t => {
+            html += `<div onclick="switchTab('tasks'); closeSearch();" class="p-2.5 text-xs hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer flex justify-between">
+              <span>${t.title}</span><span class="text-[10px] text-brand-600 font-bold">${t.priority}</span>
+            </div>`;
+          });
+        }
+        if (classMatches.length) {
+          html += '<div class="px-3 py-1 bg-slate-50 dark:bg-zinc-800 text-[10px] font-bold uppercase text-slate-400">Сабақтар</div>';
+          classMatches.forEach(c => {
+            html += `<div onclick="switchTab('schedule'); closeSearch();" class="p-2.5 text-xs hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer flex justify-between">
+              <span>${c.subject}</span><span class="text-[10px] text-slate-400">${c.day} • ${c.startTime}</span>
+            </div>`;
+          });
+        }
+        if (noteMatches.length) {
+          html += '<div class="px-3 py-1 bg-slate-50 dark:bg-zinc-800 text-[10px] font-bold uppercase text-slate-400">Конспекттер</div>';
+          noteMatches.forEach(n => {
+            html += `<div onclick="switchTab('notes'); selectNote('${n.id}'); closeSearch();" class="p-2.5 text-xs hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer">${n.title}</div>`;
+          });
+        }
+      }
+      dd.innerHTML = html;
+      dd.classList.remove('hidden');
+    }
+
+    function closeSearch() {
+      document.getElementById('searchDropdown').classList.add('hidden');
+      document.getElementById('globalSearchInput').value = '';
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      const target = document.getElementById(`tab-${tabId}`);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabId) {
+          btn.className = 'nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150 text-brand-700 bg-brand-50 dark:bg-brand-950/60 dark:text-brand-400';
+        } else {
+          btn.className = 'nav-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-medium text-sm transition-all duration-150 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800/60';
+        }
+      });
+      closeMobileSidebar();
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('-translate-x-full');
+      document.getElementById('mobileBackdrop').classList.toggle('hidden');
+    }
+
+    function closeMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const backdrop = document.getElementById('mobileBackdrop');
+      if (!sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.classList.toggle('dark');
+      document.getElementById('themeIcon').className = isDark ? 'fa-regular fa-sun text-sm' : 'fa-regular fa-moon text-sm';
+      localStorage.setItem('tf_theme', isDark ? 'dark' : 'light');
+    }
+
+    function openClassModal() { document.getElementById('modalClass').classList.remove('hidden'); }
+    function openExamModal() { document.getElementById('modalExam').classList.remove('hidden'); }
+    function openAttendanceModal() { document.getElementById('modalAttendance').classList.remove('hidden'); }
+    function openFlashcardModal() { document.getElementById('modalFlashcard').classList.remove('hidden'); }
+    function openWorkoutModal() { document.getElementById('modalWorkout').classList.remove('hidden'); }
+    function openFinanceModal() { document.getElementById('modalFinance').classList.remove('hidden'); }
+    function openLinkModal() { document.getElementById('modalLink').classList.remove('hidden'); }
+
+    function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
+
+    document.querySelectorAll('[id^="modal"]').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+      });
+    });
+
+    /* =========================================================================
+       16. INITIAL STARTUP
+       ========================================================================= */
+    window.onload = function() {
+      if (localStorage.getItem('tf_theme') === 'dark' || (!localStorage.getItem('tf_theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.getElementById('themeIcon').className = 'fa-regular fa-sun text-sm';
+      }
+
+      applyLanguage();
+      updateLiveClock();
+      checkScheduleAlerts();
+      updatePomoStats();
+      updateTimerUI();
+      renderGpaCourses();
+      renderNotesList();
+      selectNote(activeNoteId);
+      updateFlashcardUI();
+      renderWorkouts();
+      renderFinance();
+      renderLinks();
+      renderNotifications();
+    };
+  </script>
+</body>
+</html>
